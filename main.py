@@ -8,7 +8,8 @@ from datetime import datetime
 # Config
 class Config:
     BOT_TOKEN = "8151983253:AAH3kJebKs89moyrmzFv4JW09kSm4hbPhFQ"
-    CHANNEL_ID = -1001717037581
+    # CHANNEL_ID = -1001717037581
+    CHANNEL_ID = -1002222736366
     API_ID = 24876084
     API_HASH = "a1934a433c25897914d5c23803a38444"
 
@@ -102,7 +103,7 @@ async def main():
 
         message = event.message
         signal = parse_trading_signal(message.text)
-        print(message);
+        print(message)
 
         if signal:
             # Format the extracted information
@@ -120,7 +121,7 @@ async def main():
 
             # Send formatted message to your channel
             try:
-                await client.send_message(-1002451169737, formatted_message)
+                await client.send_message(-1002356346200, formatted_message)
                 print("Signal processed and forwarded successfully!")
             except Exception as e:
                 print(f"Error sending message: {e}")
