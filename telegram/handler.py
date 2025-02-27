@@ -13,7 +13,7 @@ def setup_handlers(client):
         client: The Telegram client
     """
 
-    @client.on(events.NewMessage(chats=[Config.SOURCE_CHANNEL_ID]))
+    @client.on(events.NewMessage(chats=[int(Config.SOURCE_CHANNEL_ID)]))
     async def handle_new_message(event):
         if event.message.reply_to:
             # Ignore replied messages
@@ -29,7 +29,7 @@ def setup_handlers(client):
 
             # Send formatted message to target channel
             try:
-                await client.send_message(Config.TARGET_CHANNEL_ID, formatted_message)
+                await client.send_message(int(Config.TARGET_CHANNEL_ID), formatted_message)
                 logger.info("Signal processed and forwarded successfully!")
             except Exception as e:
                 logger.error(f"Error sending message: {e}")

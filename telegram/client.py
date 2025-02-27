@@ -12,6 +12,7 @@ async def create_client():
         TelegramClient: Connected Telegram client
     """
     logger.info('Initializing Telegram client...')
+    print(Config.API_ID)
 
     client = TelegramClient(
         StringSession(Config.SESSION_STRING),
