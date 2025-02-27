@@ -11,3 +11,5 @@ class Config:
     API_ID = os.getenv("API_ID")
     API_HASH = os.getenv("API_HASH")
     SESSION_STRING = os.getenv("SESSION_STRING", "")
+    BINANCE_API_KEY = os.getenv("BINANCE_API_KEY", "")
+    BINANCE_API_SECRET_KEY = os.getenv("BINANCE_API_SECRET_KEY", "")

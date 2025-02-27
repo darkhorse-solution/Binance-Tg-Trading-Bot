@@ -1,11 +1,12 @@
-from telethon import events
+from telethon import events, TelegramClient
+
+from trading.trades import BinanceTrader
 from utils.config import Config
 from utils.logger import logger
 from trading.parser import parse_trading_signal
 from trading.formatter import format_trading_signal
 
-
-def setup_handlers(client):
+def setup_handlers(client: TelegramClient, trader: BinanceTrader):
     """
     Set up message handlers for the Telegram client.
 
