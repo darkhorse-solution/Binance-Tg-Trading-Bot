@@ -1,6 +1,6 @@
 from telethon import events, TelegramClient
 
-from trading.trades import BinanceTrader
+from trading.trader import BinanceTrader
 from utils.config import Config
 from utils.logger import logger
 from trading.parser import parse_trading_signal
