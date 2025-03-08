@@ -1,7 +1,9 @@
-from typing import re
-
+import re
 from utils.logger import logger
 
+def extract_pair(s):
+    # Extract only uppercase letters
+    return "".join(re.findall(r"[A-Z]+", s))
 
 def parse_trading_signal(message: str):
     """
@@ -22,7 +24,8 @@ def parse_trading_signal(message: str):
 
         # Look for trading pair (any word containing /)
         symbol = next((word for word in first_line.split() if '/' in word), None)
-        symbol = "".join(re.findall(r"[A-Z]", symbol))
+        symbol = extract_pair(symbol)
+
         if not symbol:
             return None
 
