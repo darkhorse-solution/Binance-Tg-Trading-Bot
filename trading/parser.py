@@ -1,3 +1,5 @@
+from typing import re
+
 from utils.logger import logger
 
 
@@ -20,6 +22,7 @@ def parse_trading_signal(message: str):
 
         # Look for trading pair (any word containing /)
         symbol = next((word for word in first_line.split() if '/' in word), None)
+        symbol = "".join(re.findall(r"[A-Z]", symbol))
         if not symbol:
             return None
 
