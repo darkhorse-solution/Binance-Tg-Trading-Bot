@@ -19,15 +19,7 @@ async def main():
             sys.exit(1)
 
         # Initialize the trading bot with all required components
-        trading_bot = TradingBot(
-            api_id=Config.API_ID,
-            api_hash=Config.API_HASH,
-            session_string=Config.SESSION_STRING,
-            binance_api_key=Config.BINANCE_API_KEY,
-            binance_api_secret=Config.BINANCE_API_SECRET_KEY,
-            source_channel_id=Config.SOURCE_CHANNEL_ID,
-            target_channel_id=Config.TARGET_CHANNEL_ID
-        )
+        trading_bot = TradingBot()
 
         # Start the bot
         logger.info('Starting Trading Bot...')

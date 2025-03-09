@@ -103,3 +103,42 @@ logger = Logger(
     log_level=Config.get_log_level(),
     log_file=Config.LOG_FILE
 )
+
+def create_trading_failures_logger():
+    """
+    Create a specialized logger for tracking trading failures.
+    
+    Returns:
+        Logger: Configured logger instance
+    """
+    import os
+    from pathlib import Path
+    
+    # Create logs directory if it doesn't exist
+    log_dir = "logs"
+    Path(log_dir).mkdir(exist_ok=True)
+    
+    log_file = os.path.join(log_dir, "trading_failures.log")
+    
+    # Create a custom logger
+    failures_logger = logging.getLogger("trading_failures")
+    failures_logger.setLevel(logging.INFO)
+    
+    # Create handlers
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(logging.INFO)
+    
+    # Create formatters
+    formatter = logging.Formatter(
+        '%(asctime)s - TRADING FAILURE - %(message)s'
+    )
+    file_handler.setFormatter(formatter)
+    
+    # Add handlers to logger
+    failures_logger.handlers = []  # Clear any existing handlers
+    failures_logger.addHandler(file_handler)
+    
+    return failures_logger
+
+# Initialize the failures logger
+trading_failures_logger = create_trading_failures_logger()

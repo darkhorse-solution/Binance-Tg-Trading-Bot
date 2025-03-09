@@ -11,26 +11,23 @@ class BinanceTrader:
     """
 
     def __init__(self, api_key: str, api_secret: str,
-                 default_risk_percent: float = 2.0, max_leverage: int = 20):
+                default_risk_percent: float = 2.0, max_leverage: int = 20,
+                target_channel_id: int = None):
         """
         Initialize the Binance trader with API credentials.
-
-        Args:
-            api_key (str): Binance API key
-            api_secret (str): Binance API secret
-            default_risk_percent (float): Default percentage of account to risk per trade
-            max_leverage (int): Maximum leverage to use
         """
         self.client = Client(api_key, api_secret)
-
-        # Initialize risk manager
         self.risk_manager = RiskManager(default_risk_percent, max_leverage)
-
-        # Cache for symbol information to avoid repeated API calls
         self._symbol_info_cache = {}
-
-        # Initialize the cache with common symbols at startup
+        self._leverage_cache = {}  # Cache for max leverage values
         self._prefetch_common_symbols()
+        self.telegram_client = None
+        self.target_channel_id = target_channel_id
+        self.default_max_leverage = max_leverage
+
+    def set_telegram_client(self, client):
+        """Set the Telegram client for sending notifications."""
+        self.telegram_client = client
 
     def _prefetch_common_symbols(self):
         """Prefetch information for common trading pairs to avoid API rate limits."""
@@ -38,11 +35,11 @@ class BinanceTrader:
             exchange_info = self.client.get_exchange_info()
 
             # Focus on futures symbols for leveraged trading
-            for symbol_info in exchange_info['symbols'][:20]:  # Limit to top 20 to avoid rate limits
+            for symbol_info in exchange_info['symbols']:  # Limit to top 20 to avoid rate limits
                 symbol = symbol_info['symbol']
                 self._symbol_info_cache[symbol] = symbol_info
 
-            logger.info(f"Prefetched {len(self._symbol_info_cache)} common symbols")
+            logger.info(f"Prefetched {len(self._symbol_info_cache)} common symbols")            
         except Exception as e:
             logger.warning(f"Failed to prefetch symbols: {e}")
 
@@ -68,22 +65,83 @@ class BinanceTrader:
             logger.error(f"Error getting symbol info for {symbol}: {e}")
             return None
 
+    def get_max_leverage(self, symbol: str) -> int:
+        """
+        Get the maximum allowed leverage for a symbol.
+        
+        Args:
+            symbol (str): The trading symbol
+            
+        Returns:
+            int: Maximum allowed leverage, or 0 if not supported
+        """
+        # Check cache first
+        if symbol in self._leverage_cache:
+            return self._leverage_cache[symbol]
+            
+        try:
+            # Try to get leverage brackets from Binance
+            brackets = self.client.futures_leverage_bracket(symbol=symbol)
+            
+            # If we got a valid response, the symbol is supported
+            if brackets and len(brackets) > 0 and 'brackets' in brackets[0]:
+                # Get the maximum leverage from the first bracket
+                max_lev = brackets[0]['brackets'][0]['initialLeverage']
+                self._leverage_cache[symbol] = max_lev
+                logger.info(f"Maximum leverage for {symbol}: {max_lev}x")
+                return max_lev
+                
+            return 0
+        except Exception as e:
+            # If we get an error, the symbol might not be supported
+            logger.warning(f"Failed to get leverage info for {symbol}: {e}")
+            self._leverage_cache[symbol] = 0
+            return 0
+        
+    async def handle_trading_failure(self, symbol: str, message: str, error: Exception, original_signal: str):
+        """
+        Handle a trading failure by logging and sending notification.
+        
+        Args:
+            symbol (str): The trading symbol
+            message (str): Description of the failure
+            error (Exception): The exception that occurred
+            original_signal (str): The original signal message
+        """
+        # Log to specialized logger
+        from utils.logger import trading_failures_logger
+        
+        error_msg = f"Symbol: {symbol}, Error: {str(error)}, Message: {message}"
+        trading_failures_logger.error(error_msg)
+        trading_failures_logger.info(f"Original signal: {original_signal}")
+        
+        # Send message to channel if client is available
+        if self.telegram_client and self.target_channel_id:
+            notification = (
+                f"❌ TRADE EXECUTION FAILED\n\n"
+                f"Symbol: {symbol}\n"
+                f"Reason: {message}\n"
+                f"Error: {str(error)}\n\n"
+                f"This trading signal could not be processed automatically."
+            )
+            
+            try:
+                await self.telegram_client.send_message(self.target_channel_id, notification)
+                logger.info(f"Sent trading failure notification for {symbol}")
+            except Exception as e:
+                logger.error(f"Failed to send notification: {e}")
+
     async def execute_signal(self, signal: Dict) -> Dict:
         """
         Execute trades based on a parsed signal.
-
-        Args:
-            signal (dict): The parsed signal data
-
-        Returns:
-            dict: Trade execution results
         """
         symbol = signal['binance_symbol']
         position_type = signal['position_type']
         entry_price = signal['entry_price']
-        leverage = signal['leverage']
+        requested_leverage = signal['leverage']
         stop_loss = signal.get('stop_loss')
         take_profit_levels = signal['take_profit_levels']
+        original_message = signal.get('original_message', 'Unknown message')
 
         results = {
             'symbol': symbol,
@@ -96,85 +154,108 @@ class BinanceTrader:
         }
 
         try:
-            # Get account balance for risk validation
-            account = self.client.futures_account_balance()
-            usdt_balance = float(next((item['balance'] for item in account if item['asset'] == 'USDT'), 0))
-            logger.info(f"{usdt_balance}")
-
-            # Validate risk parameters
-            is_valid, message = self.risk_manager.validate_risk_parameters(signal, usdt_balance)
-
-            if not is_valid:
-                results['errors'].append(f"Risk validation failed: {message}")
-                logger.warning(f"Signal rejected due to risk parameters: {message}")
+            # Step 1: Check the maximum supported leverage
+            max_leverage = self.get_max_leverage(symbol)
+            
+            if max_leverage == 0:
+                # Symbol is not supported
+                await self.handle_trading_failure(
+                    symbol, 
+                    "Symbol not supported on Binance Futures", 
+                    Exception("Unsupported symbol"), 
+                    original_message
+                )
+                results['errors'].append(f"Symbol {symbol} not supported on Binance Futures")
+                return results
+                
+            # Step 2: Apply the minimum of requested leverage and max supported leverage
+            effective_leverage = min(requested_leverage, max_leverage)
+            
+            if effective_leverage < requested_leverage:
+                message = f"Requested leverage {requested_leverage}x exceeds maximum supported leverage {max_leverage}x for {symbol}. Using {effective_leverage}x instead."
+                logger.warning(message)
+                results['warnings'].append(message)
+            
+            # Step 3: Set leverage for the symbol
+            try:
+                self.client.futures_change_leverage(symbol=symbol, leverage=effective_leverage)
+                logger.info(f"Set leverage for {symbol} to {effective_leverage}x")
+            except Exception as e:
+                await self.handle_trading_failure(
+                    symbol, 
+                    "Failed to set leverage", 
+                    e, 
+                    original_message
+                )
+                results['errors'].append(f"Failed to set leverage for {symbol}: {str(e)}")
                 return results
 
-            if "Warning" in message:
-                results['warnings'].append(message)
-                logger.warning(message)
+            # Step 4: Calculate position size using risk management
+            try:
+                position_size, _ = self.calculate_coin_amount_to_buy(
+                    symbol, effective_leverage
+                )
+                results['position_size'] = position_size
+            except Exception as e:
+                await self.handle_trading_failure(
+                    symbol, 
+                    "Failed to calculate position size", 
+                    e, 
+                    original_message
+                )
+                results['errors'].append(f"Position sizing error: {str(e)}")
+                return results
 
-            # Set leverage for the symbol
-            self.client.futures_change_leverage(symbol=symbol, leverage=leverage)
-
-            # Calculate position size using risk management
-            position_size, _ = self.calculate_coin_amount_to_buy(
-                symbol, leverage
-            )
-            results['position_size'] = position_size
-
-            # Create main order - could be market or limit depending on entry_price vs current
+            # Step 5: Create the main entry order
             side = "BUY" if position_type == 'LONG' else "SELL"
-            entry_order = await self._create_entry_order(symbol, side, position_size, entry_price)
-            results['entry_order'] = entry_order
+            try:
+                entry_order = await self._create_entry_order(symbol, side, position_size, entry_price)
+                results['entry_order'] = entry_order
+                
+                if not entry_order or 'orderId' not in entry_order:
+                    raise Exception("Failed to create entry order")
+                    
+            except Exception as e:
+                await self.handle_trading_failure(
+                    symbol, 
+                    "Failed to create entry order", 
+                    e, 
+                    original_message
+                )
+                results['errors'].append(f"Entry order error: {str(e)}")
+                return results
 
-            # If entry order successful, place stop loss and take profit orders
-            if entry_order and 'orderId' in entry_order:
-                await self._create_take_profit_order(symbol, side, position_size, leverage, entry_price, 100)
-                await self._create_stop_loss_order(symbol, side, position_size, leverage, entry_price, 150)
-                # Place stop loss order if provided
-                # if stop_loss:
-                #     sl_side = "SELL" if position_type == 'LONG' else "BUY"
-                #     stop_loss_order = await self._create_stop_loss_order(
-                #         symbol, sl_side, position_size, stop_loss
-                #     )
-                #     results['stop_loss_order'] = stop_loss_order
-                # else:
-                #     # Create automatic stop loss if none provided (based on risk management)
-                #     auto_stop_loss = self._calculate_auto_stop_loss(entry_price, position_type, leverage)
-                #     sl_side = "SELL" if position_type == 'LONG' else "BUY"
-                #     stop_loss_order = await self._create_stop_loss_order(
-                #         symbol, sl_side, position_size, auto_stop_loss
-                #     )
-                #     results['stop_loss_order'] = stop_loss_order
-                #     results['warnings'].append(f"Auto stop-loss created at {auto_stop_loss}")
-
-                # # Place take profit orders
-                # tp_remaining = position_size
-                # for i, tp in enumerate(take_profit_levels):
-                #     tp_side = "SELL" if position_type == 'LONG' else "BUY"
-
-                #     # Calculate position size for this TP level
-                #     # For last TP level, use remaining size to ensure we close full position
-                #     if i == len(take_profit_levels) - 1:
-                #         tp_size = tp_remaining
-                #     else:
-                #         tp_size = position_size * (tp['percentage'] / 100)
-                #         tp_remaining -= tp_size
-
-                #     # Create take profit order
-                #     tp_order = await self._create_take_profit_order(
-                #         symbol=symbol,
-                #         side=tp_side,
-                #         quantity=tp_size,
-                #         price=tp['price']
-                #     )
-                #     results['take_profit_orders'].append(tp_order)
+            # Step 6: Create take profit and stop loss orders
+            try:
+                tp_result = await self._create_take_profit_order(
+                    symbol, side, position_size, requested_leverage, entry_price, 100
+                )
+                results['take_profit_orders'].append(tp_result)
+                
+                sl_result = await self._create_stop_loss_order(
+                    symbol, side, position_size, requested_leverage, entry_price, 150
+                )
+                results['stop_loss_order'] = sl_result
+                
+            except Exception as e:
+                logger.error(f"Error creating TP/SL orders for {symbol}: {e}")
+                results['warnings'].append(f"Created entry order, but failed to set TP/SL: {str(e)}")
+                # We still return success since the main order was placed
 
             return results
 
         except Exception as e:
             error_msg = f"Error executing signal for {symbol}: {e}"
             logger.error(error_msg)
+            
+            # Handle any unexpected errors
+            await self.handle_trading_failure(
+                symbol, 
+                "Unexpected error during trade execution", 
+                e, 
+                original_message
+            )
+            
             results['errors'].append(error_msg)
             return results
 

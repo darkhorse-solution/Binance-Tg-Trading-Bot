@@ -41,6 +41,8 @@ class Config:
     # Wallet settings
     WALLET_RATIO = float(os.getenv("WALLET_RATIO", "10"))
     QUOTE_ASSET = os.getenv("QUOTE_ASSET", "USDT")
+    
+    ENABLE_FAILURE_NOTIFICATIONS = os.getenv("ENABLE_FAILURE_NOTIFICATIONS", "true").lower() == "true"
 
     @classmethod
     def validate(cls) -> Dict[str, str]:

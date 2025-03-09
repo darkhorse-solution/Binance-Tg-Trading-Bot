@@ -6,6 +6,7 @@ from telethon.sessions import StringSession
 from trading.signal import SignalParser, SignalFormatter
 from trading.trader import BinanceTrader
 from utils.logger import logger
+from utils.config import Config
 
 
 class TradingBot:
@@ -13,9 +14,7 @@ class TradingBot:
     Main trading bot that integrates Telegram client and Binance trading.
     """
 
-    def __init__(self, api_id, api_hash, session_string,
-                 binance_api_key, binance_api_secret,
-                 source_channel_id, target_channel_id):
+    def __init__(self):
         """
         Initialize the trading bot with all required components.
 
@@ -28,15 +27,15 @@ class TradingBot:
             source_channel_id (int): Channel ID to listen for signals
             target_channel_id (int): Channel ID to forward processed signals
         """
-        self.api_id = api_id
-        self.api_hash = api_hash
-        self.session_string = session_string
-        self.source_channel_id = int(source_channel_id)
-        self.target_channel_id = int(target_channel_id)
+        self.api_id = Config.API_ID
+        self.api_hash = Config.API_HASH
+        self.session_string = Config.SESSION_STRING
+        self.source_channel_id = int(Config.SOURCE_CHANNEL_ID)
+        self.target_channel_id = int(Config.TARGET_CHANNEL_ID)
 
         # Initialize components
         self.client = None
-        self.trader = BinanceTrader(binance_api_key, binance_api_secret)
+        self.trader = BinanceTrader(Config.BINANCE_API_KEY, Config.BINANCE_API_SECRET_KEY, target_channel_id=self.target_channel_id if Config.ENABLE_FAILURE_NOTIFICATIONS else None)
         self.parser = SignalParser()
         self.formatter = SignalFormatter()
 
