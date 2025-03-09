@@ -98,7 +98,8 @@ class SignalParser:
                 'leverage': leverage,
                 'entry_price': entry_price,
                 'stop_loss': stop_loss,
-                'take_profit_levels': tp_levels
+                'take_profit_levels': tp_levels,
+                'original_message': message
             }
 
         except Exception as e:
@@ -110,17 +111,24 @@ class SignalFormatter:
     """
     Class for formatting parsed signals into readable messages.
     """
-
     def format(self, signal):
         """
-        Format a parsed trading signal into a readable message for Binance trading.
-
+        Legacy format method - disabled in favor of new messaging system.
+        This is kept for compatibility with existing code but will not 
+        send duplicate messages if entry notifications are enabled.
+        
         Args:
             signal (dict): The parsed signal data
 
         Returns:
-            str: Formatted message
+            str: Empty string when entry notifications are enabled, or formatted message when disabled
         """
+        from utils.config import Config
+        
+        # If entry notifications are enabled, don't send duplicates
+        if Config.ENABLE_ENTRY_NOTIFICATIONS:
+            return ""
+        
         # Format position type for better visibility
         position_emoji = "🟢" if signal['position_type'] == "LONG" else "🔴"
         position_display = f"{position_emoji} {signal['position_type']}"

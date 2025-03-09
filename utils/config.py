@@ -34,15 +34,27 @@ class Config:
     ENABLE_AUTO_SL = os.getenv("ENABLE_AUTO_SL", "true").lower() == "true"
     AUTO_SL_PERCENT = float(os.getenv("AUTO_SL_PERCENT", "5.0"))
 
+    # Position management
+    CLOSE_POSITIONS_AFTER_TRADE = os.getenv("CLOSE_POSITIONS_AFTER_TRADE", "false").lower() == "true"
+    POSITION_MONITOR_TIMEOUT = int(os.getenv("POSITION_MONITOR_TIMEOUT", "30"))  # Minutes
+    
+    # Order settings
+    DEFAULT_TP_PERCENT = float(os.getenv("DEFAULT_TP_PERCENT", "100.0"))
+    DEFAULT_SL_PERCENT = float(os.getenv("DEFAULT_SL_PERCENT", "150.0"))
+    
+    # Notification settings
+    ENABLE_ENTRY_NOTIFICATIONS = os.getenv("ENABLE_ENTRY_NOTIFICATIONS", "true").lower() == "true"
+    ENABLE_PROFIT_NOTIFICATIONS = os.getenv("ENABLE_PROFIT_NOTIFICATIONS", "true").lower() == "true"
+    ENABLE_FAILURE_NOTIFICATIONS = os.getenv("ENABLE_FAILURE_NOTIFICATIONS", "true").lower() == "true"
+    SEND_PROFIT_ONLY_FOR_MANUAL_EXITS = os.getenv("SEND_PROFIT_ONLY_FOR_MANUAL_EXITS", "true").lower() == "true"
+
     # Log settings
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
-    LOG_FILE = os.getenv("LOG_FILE", "trading_bot.log")
+    LOG_FILE = os.getenv("LOG_FILE", "logs/trading_bot.log")
 
     # Wallet settings
     WALLET_RATIO = float(os.getenv("WALLET_RATIO", "10"))
     QUOTE_ASSET = os.getenv("QUOTE_ASSET", "USDT")
-    
-    ENABLE_FAILURE_NOTIFICATIONS = os.getenv("ENABLE_FAILURE_NOTIFICATIONS", "true").lower() == "true"
 
     @classmethod
     def validate(cls) -> Dict[str, str]:

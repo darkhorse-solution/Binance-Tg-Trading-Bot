@@ -55,8 +55,12 @@ class TradingBot:
 
         await self.client.connect()
         await self._authenticate()
+        
+        # IMPORTANT: Set the telegram client in the trader here
+        self.trader.set_telegram_client(self.client)
+        self.trader.target_channel_id = self.target_channel_id  # Explicitly set target channel
+        
         self._setup_handlers()
-
         logger.info('Bot started successfully')
 
     async def run(self):
@@ -86,9 +90,10 @@ class TradingBot:
                 logger.info('Authentication successful!')
                 session_string = self.client.session.save()
                 logger.info(f'Your session string (save this): {session_string}')
-
+                
     def _setup_handlers(self):
         """Set up message handlers for the Telegram client."""
+        from utils.config import Config
 
         @self.client.on(events.NewMessage(chats=[self.source_channel_id]))
         async def handle_new_message(event):
@@ -109,12 +114,14 @@ class TradingBot:
                 # Execute trading orders
                 await self._execute_trades(signal)
 
-                # Send formatted message to target channel
-                try:
-                    await self.client.send_message(self.target_channel_id, formatted_message)
-                    logger.info("Signal processed and forwarded successfully!")
-                except Exception as e:
-                    logger.error(f"Error sending message: {e}")
+                # Send formatted message to target channel if not empty and entry notifications are disabled
+                # This prevents duplicate messages when entry notifications are enabled
+                if formatted_message and not Config.ENABLE_ENTRY_NOTIFICATIONS:
+                    try:
+                        await self.client.send_message(self.target_channel_id, formatted_message)
+                        logger.info("Signal processed and forwarded successfully!")
+                    except Exception as e:
+                        logger.error(f"Error sending message: {e}")
             else:
                 logger.info("Message received but not a valid trading signal")
 

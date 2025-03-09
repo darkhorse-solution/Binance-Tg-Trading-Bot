@@ -1,14 +1,22 @@
 def format_trading_signal(signal):
     """
-    Format a parsed trading signal into a readable message for Binance trading.
-
+    Legacy format function - disabled in favor of new messaging system.
+    This is kept for compatibility with existing code but will not 
+    send duplicate messages if entry notifications are enabled.
+    
     Args:
         signal (dict): The parsed signal data
 
     Returns:
-        str: Formatted message
+        str: Empty string when entry notifications are enabled, or formatted message when disabled
     """
-    # Format position type for better visibility
+    from utils.config import Config
+    
+    # If entry notifications are enabled, don't send duplicates
+    if Config.ENABLE_ENTRY_NOTIFICATIONS:
+        return ""
+    
+    # Otherwise use the original formatting for backward compatibility
     position_emoji = "🟢" if signal['position_type'] == "LONG" else "🔴"
     position_display = f"{position_emoji} {signal['position_type']}"
 
