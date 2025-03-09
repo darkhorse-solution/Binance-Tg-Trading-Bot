@@ -1,12 +1,9 @@
-# trading/trader.py
-import asyncio
+import math
 from binance.client import Client
 from utils.logger import logger
 from typing import Dict, List, Optional, Any
-import time
-import asyncio
 from trading.risk import RiskManager
-
+from utils.config import Config
 
 class BinanceTrader:
     """
@@ -102,6 +99,7 @@ class BinanceTrader:
             # Get account balance for risk validation
             account = self.client.futures_account_balance()
             usdt_balance = float(next((item['balance'] for item in account if item['asset'] == 'USDT'), 0))
+            logger.info(f"{usdt_balance}")
 
             # Validate risk parameters
             is_valid, message = self.risk_manager.validate_risk_parameters(signal, usdt_balance)
@@ -119,8 +117,8 @@ class BinanceTrader:
             self.client.futures_change_leverage(symbol=symbol, leverage=leverage)
 
             # Calculate position size using risk management
-            position_size = await self._calculate_position_size(
-                symbol, entry_price, stop_loss, leverage
+            position_size, _ = self.calculate_coin_amount_to_buy(
+                symbol, leverage
             )
             results['position_size'] = position_size
 
@@ -131,44 +129,46 @@ class BinanceTrader:
 
             # If entry order successful, place stop loss and take profit orders
             if entry_order and 'orderId' in entry_order:
+                await self._create_take_profit_order(symbol, side, position_size, leverage, entry_price, 100)
+                await self._create_stop_loss_order(symbol, side, position_size, leverage, entry_price, 150)
                 # Place stop loss order if provided
-                if stop_loss:
-                    sl_side = "SELL" if position_type == 'LONG' else "BUY"
-                    stop_loss_order = await self._create_stop_loss_order(
-                        symbol, sl_side, position_size, stop_loss
-                    )
-                    results['stop_loss_order'] = stop_loss_order
-                else:
-                    # Create automatic stop loss if none provided (based on risk management)
-                    auto_stop_loss = self._calculate_auto_stop_loss(entry_price, position_type, leverage)
-                    sl_side = "SELL" if position_type == 'LONG' else "BUY"
-                    stop_loss_order = await self._create_stop_loss_order(
-                        symbol, sl_side, position_size, auto_stop_loss
-                    )
-                    results['stop_loss_order'] = stop_loss_order
-                    results['warnings'].append(f"Auto stop-loss created at {auto_stop_loss}")
+                # if stop_loss:
+                #     sl_side = "SELL" if position_type == 'LONG' else "BUY"
+                #     stop_loss_order = await self._create_stop_loss_order(
+                #         symbol, sl_side, position_size, stop_loss
+                #     )
+                #     results['stop_loss_order'] = stop_loss_order
+                # else:
+                #     # Create automatic stop loss if none provided (based on risk management)
+                #     auto_stop_loss = self._calculate_auto_stop_loss(entry_price, position_type, leverage)
+                #     sl_side = "SELL" if position_type == 'LONG' else "BUY"
+                #     stop_loss_order = await self._create_stop_loss_order(
+                #         symbol, sl_side, position_size, auto_stop_loss
+                #     )
+                #     results['stop_loss_order'] = stop_loss_order
+                #     results['warnings'].append(f"Auto stop-loss created at {auto_stop_loss}")
 
-                # Place take profit orders
-                tp_remaining = position_size
-                for i, tp in enumerate(take_profit_levels):
-                    tp_side = "SELL" if position_type == 'LONG' else "BUY"
+                # # Place take profit orders
+                # tp_remaining = position_size
+                # for i, tp in enumerate(take_profit_levels):
+                #     tp_side = "SELL" if position_type == 'LONG' else "BUY"
 
-                    # Calculate position size for this TP level
-                    # For last TP level, use remaining size to ensure we close full position
-                    if i == len(take_profit_levels) - 1:
-                        tp_size = tp_remaining
-                    else:
-                        tp_size = position_size * (tp['percentage'] / 100)
-                        tp_remaining -= tp_size
+                #     # Calculate position size for this TP level
+                #     # For last TP level, use remaining size to ensure we close full position
+                #     if i == len(take_profit_levels) - 1:
+                #         tp_size = tp_remaining
+                #     else:
+                #         tp_size = position_size * (tp['percentage'] / 100)
+                #         tp_remaining -= tp_size
 
-                    # Create take profit order
-                    tp_order = await self._create_take_profit_order(
-                        symbol=symbol,
-                        side=tp_side,
-                        quantity=tp_size,
-                        price=tp['price']
-                    )
-                    results['take_profit_orders'].append(tp_order)
+                #     # Create take profit order
+                #     tp_order = await self._create_take_profit_order(
+                #         symbol=symbol,
+                #         side=tp_side,
+                #         quantity=tp_size,
+                #         price=tp['price']
+                #     )
+                #     results['take_profit_orders'].append(tp_order)
 
             return results
 
@@ -240,6 +240,104 @@ class BinanceTrader:
             # Return a safe minimal position size
             return 0.01  # Minimum to avoid errors
 
+    def get_price_precision(self, symbol):
+        """
+        Get the allowed price precision for the symbol.
+        :param symbol: Trading pair symbol.
+        :return: Allowed price precision.
+        """
+        try:
+            info = self.client.futures_exchange_info()
+
+            for item in info['symbols']:
+                if item['symbol'] == symbol:
+                    for f in item['filters']:
+                        if f['filterType'] == 'PRICE_FILTER':
+                            return int(round(-math.log(float(f['tickSize']), 10), 0))
+        except Exception as e:
+            logger.error(f'get_price_precision {e}')
+            return None
+        
+    def get_balance_in_quote(self, quote_symbol):
+        """
+        Get balance of specific symbol in future account.
+        :param quote_symbol: Symbol ex: USDT
+        :return: balance of symbol
+        """
+        try:
+            balances = self.client.futures_account_balance()
+
+            for b in balances:
+                if b['asset'] == quote_symbol.upper():
+                    return float(b['balance'])
+
+        except Exception as e:
+            logger.error(f"{e}, get_balance_in_quote")
+
+    def get_precise_quantity(self, symbol, quantity):
+        """
+        Get correct quantity with specific symbol and quantity by stepSize in filter => LOT_SIZE not PRICE_FILTER
+        :param symbol: current symbol
+        :param quantity: quantity
+        :return: correct quantity by
+        """
+        try:
+            info = self.client.futures_exchange_info()
+
+            for item in info['symbols']:
+                if item['symbol'] == symbol:
+                    for f in item['filters']:
+                        if f['filterType'] == 'LOT_SIZE':
+                            step_size = float(f['stepSize'])
+                            break
+
+            precision = int(round(-math.log(step_size, 10), 0))
+            quantity = float(round(quantity, precision))
+
+            return quantity
+
+        except Exception as e:
+            logger.error(f'get_precise_quantity {get_precise_quantity}')
+            return None
+
+    def get_last_price(self, pair):
+        """
+        Get latest symbol price
+        :param pair: currencies pair  ex: BNBUSDT
+        :return: currency of price by USDT: example
+        """
+        try:
+            prices = self.client.futures_symbol_ticker()
+
+            for price in prices:
+                if price['symbol'] == pair:
+                    return float(price['price'])
+
+        except Exception as e:
+            logger.error(f'get_last_price {e}')
+
+
+    def calculate_coin_amount_to_buy(self, pair, leverage):
+        """
+        calculate coin amount based on wallet ratio and leverage, coin price and set with precision_quantity
+        :param pair: coin symbol pair ex: BNBUSDT
+        :return: coin amount and coin price
+        """
+        try:
+            QUOTE_ASSET = Config.QUOTE_ASSET
+            WALLET_RATIO = Config.WALLET_RATIO
+            account_balance = self.get_balance_in_quote(QUOTE_ASSET)
+            amount_to_trade_in_quote = ((account_balance / 100) * WALLET_RATIO) * leverage
+
+            coin_price = self.get_last_price(pair)
+            coin_amount = amount_to_trade_in_quote / coin_price
+            coin_amount = self.get_precise_quantity(pair, coin_amount)
+            logger.info(f"amount to buy {coin_amount} x {leverage} * {coin_price}")
+            return coin_amount, coin_price
+
+        except Exception as e:
+            logger.error(f'calculate_coin_amount_to_buy {e}')
+
     async def _create_entry_order(self, symbol: str, side: str,
                                   quantity: float, price: float) -> Dict:
         """
@@ -255,30 +353,12 @@ class BinanceTrader:
             dict: Order response
         """
         try:
-            # Check current price
-            ticker = self.client.futures_ticker(symbol=symbol)
-            current_price = float(ticker['lastPrice'])
-
-            # Decide if we should use limit or market order
-            price_difference_pct = abs(price - current_price) / current_price
-
-            if price_difference_pct <= 0.003:  # Within 0.3% of current price, use market order
-                order = self.client.futures_create_order(
-                    symbol=symbol,
-                    side=side,
-                    type="MARKET",  # Use correct string constant
-                    quantity=quantity
-                )
-            else:
-                # Use a limit order with reasonable time in force
-                order = self.client.futures_create_order(
-                    symbol=symbol,
-                    side=side,
-                    type="LIMIT",  # Use correct string constant
-                    timeInForce="GTC",  # Good Till Cancelled - correct string constant
-                    quantity=quantity,
-                    price=price
-                )
+            order = self.client.futures_create_order(
+                symbol=symbol,
+                side=side,
+                type="MARKET",  # Use correct string constant
+                quantity=quantity
+            )
 
             logger.info(f"Created entry order for {symbol}, {side} at {price}: {order['orderId']}")
             return order
@@ -288,7 +368,7 @@ class BinanceTrader:
             return {"error": str(e)}
 
     async def _create_stop_loss_order(self, symbol: str, side: str,
-                                      quantity: float, price: float) -> Dict:
+                                        quantity: float, leverage: int, entry_price: float, sl_percent: float) -> Dict:
         """
         Create a stop loss order.
 
@@ -301,16 +381,24 @@ class BinanceTrader:
         Returns:
             dict: Order response
         """
+        price_precision = self.get_price_precision(symbol)
+        if side == 'BUY':
+            sl_price = entry_price * (leverage - sl_percent / 100) / leverage
+        else:
+            sl_price = entry_price * (leverage + sl_percent / 100) / leverage
+        sl_price = round(sl_price, price_precision)
+
         try:
             order = self.client.futures_create_order(
                 symbol=symbol,
-                side=side,
+                side='SELL' if side == 'BUY' else 'BUY',
                 type="STOP_MARKET",  # Use correct string constant
-                stopPrice=price,
+                stopPrice=sl_price,
+                quantity=quantity,
                 closePosition=True  # Close the entire position
             )
 
-            logger.info(f"Created stop loss order for {symbol} at {price}: {order['orderId']}")
+            logger.info(f"Created stop loss order for {symbol} at {sl_price}: {order['orderId']}")
             return order
 
         except Exception as e:
@@ -318,7 +406,15 @@ class BinanceTrader:
             return {"error": str(e)}
 
     async def _create_take_profit_order(self, symbol: str, side: str,
-                                        quantity: float, price: float) -> Dict:
+                                        quantity: float, leverage, entry_price, tp_percent) -> Dict:
+        
+        price_precision = self.get_price_precision(symbol)
+        if side == 'BUY':
+            tp_price = entry_price * (leverage + tp_percent / 100) / leverage
+        else:
+            tp_price = entry_price * (leverage - tp_percent / 100) / leverage
+
+        tp_price = round(tp_price, price_precision)
         """
         Create a take profit order.
 
@@ -334,13 +430,13 @@ class BinanceTrader:
         try:
             order = self.client.futures_create_order(
                 symbol=symbol,
-                side=side,
+                side='SELL' if side == 'BUY' else 'BUY',
                 type="TAKE_PROFIT_MARKET",  # Use correct string constant
-                stopPrice=price,
+                stopPrice=tp_price,
                 quantity=quantity
             )
 
-            logger.info(f"Created take profit order for {symbol} at {price}: {order['orderId']}")
+            logger.info(f"Created take profit order for {symbol} at {tp_price}: {order['orderId']}")
             return order
 
         except Exception as e:

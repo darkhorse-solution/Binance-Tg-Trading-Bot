@@ -38,6 +38,10 @@ class Config:
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
     LOG_FILE = os.getenv("LOG_FILE", "trading_bot.log")
 
+    # Wallet settings
+    WALLET_RATIO = float(os.getenv("WALLET_RATIO", "10"))
+    QUOTE_ASSET = os.getenv("QUOTE_ASSET", "USDT")
+
     @classmethod
     def validate(cls) -> Dict[str, str]:
         """
