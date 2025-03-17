@@ -38,6 +38,7 @@ A robust, class-based Telegram bot for monitoring, parsing, and automatically ex
 ### Requirements
 
 - Python 3.7 or higher (automatically installed on Ubuntu/Debian systems if not already present)
+- python3-venv package for creating virtual environments (automatically installed by the setup script)
 - Internet connection for downloading dependencies
 - Telegram account with API access
 - Bybit exchange account with API access
@@ -58,6 +59,7 @@ A robust, class-based Telegram bot for monitoring, parsing, and automatically ex
    
    The script will:
    - Check if Python 3 is installed, and attempt to install it on Ubuntu/Debian systems if needed
+   - Verify and install the python3-venv package if required
    - Create a virtual environment
    - Install required dependencies
    - Create necessary directories
@@ -84,30 +86,36 @@ A robust, class-based Telegram bot for monitoring, parsing, and automatically ex
    cd Bybit-Tg-Trading-Bot
    ```
 
-2. Create a virtual environment
+2. Install Python and the python3-venv package (Ubuntu/Debian)
+   ```bash
+   sudo apt-get update
+   sudo apt-get install python3 python3-venv
+   ```
+
+3. Create a virtual environment
    ```bash
    python3 -m venv venv
    source venv/bin/activate
    ```
 
-3. Install dependencies
+4. Install dependencies
    ```bash
    pip install --upgrade pip
    pip install -r requirements.txt
    ```
 
-4. Create necessary directories
+5. Create necessary directories
    ```bash
    mkdir -p logs
    ```
 
-5. Create and configure your .env file
+6. Create and configure your .env file
    ```bash
    cp .env.sample .env   # If .env.sample exists
    # Edit .env with your configuration
    ```
 
-6. Run the bot
+7. Run the bot
    ```bash
    python main.py
    ```
@@ -192,6 +200,19 @@ TP4 - 54000 (20%)
 - **Bot not responding**: Check if your Telegram API credentials and bot token are correct
 - **Trades not executing**: Verify your Binance API keys have trading permissions enabled
 - **Missing signals**: Ensure the bot has access to the source channel
+- **Virtual environment errors**: If you encounter issues with the virtual environment:
+  ```bash
+  sudo apt-get update
+  sudo apt-get install python3-venv
+  # For specific Python versions (e.g., Python 3.12)
+  sudo apt-get install python3.12-venv
+  ```
+- **pip command not found**: If pip is not available after activating the virtual environment:
+  ```bash
+  curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+  python get-pip.py
+  rm get-pip.py
+  ```
 
 ## Disclaimer
 

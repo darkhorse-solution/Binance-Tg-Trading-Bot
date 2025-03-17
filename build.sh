@@ -16,6 +16,49 @@ echo -e "\n${BOLD}Checking Python version...${NC}"
 python_version=$(python3 --version 2>&1)
 if [[ $python_version =~ "Python 3" ]]; then
     echo -e "${GREEN}✅ Python 3 is installed: $python_version${NC}"
+    
+    # Extract Python version
+    python_version_number=$(echo $python_version | grep -oP '(?<=Python 3\.)\d+')
+    
+    # Check if python3-venv is installed
+    echo -e "\n${BOLD}Checking for python3-venv package...${NC}"
+    if ! dpkg -l | grep -q "python3.*-venv"; then
+        echo -e "${YELLOW}⚠️ python3-venv package is not installed.${NC}"
+        
+        # Check if user has sudo privileges
+        if command -v sudo >/dev/null 2>&1; then
+            echo -e "${YELLOW}Installing python3-venv package...${NC}"
+            if [[ -n "$python_version_number" ]]; then
+                sudo apt-get update
+                sudo apt-get install -y python3.$python_version_number-venv
+                if [ $? -ne 0 ]; then
+                    echo -e "${YELLOW}Specific version package not found. Installing generic python3-venv...${NC}"
+                    sudo apt-get install -y python3-venv
+                fi
+            else
+                sudo apt-get update
+                sudo apt-get install -y python3-venv
+            fi
+            
+            if [ $? -ne 0 ]; then
+                echo -e "${RED}❌ Failed to install python3-venv package.${NC}"
+                echo -e "Please install it manually using:"
+                echo -e "sudo apt-get update"
+                echo -e "sudo apt-get install python3-venv"
+                exit 1
+            fi
+            echo -e "${GREEN}✅ python3-venv package installed.${NC}"
+        else
+            echo -e "${RED}❌ Sudo privileges required to install python3-venv.${NC}"
+            echo -e "Please run:"
+            echo -e "sudo apt-get update"
+            echo -e "sudo apt-get install python3-venv"
+            echo -e "Then run this script again."
+            exit 1
+        fi
+    else
+        echo -e "${GREEN}✅ python3-venv is already installed.${NC}"
+    fi
 else
     echo -e "${YELLOW}⚠️ Python 3 is not found.${NC}"
     echo -e "Attempting to install Python 3 on Ubuntu..."
@@ -78,23 +121,56 @@ if [ -d "venv" ]; then
         echo "Removing existing virtual environment..."
         rm -rf venv
         python3 -m venv venv
+        if [ $? -ne 0 ]; then
+            echo -e "${RED}❌ Failed to create virtual environment.${NC}"
+            echo -e "Please make sure python3-venv is installed."
+            exit 1
+        fi
         echo -e "${GREEN}✅ Virtual environment created.${NC}"
     else
         echo "Using existing virtual environment."
     fi
 else
     python3 -m venv venv
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}❌ Failed to create virtual environment.${NC}"
+        echo -e "Please make sure python3-venv is installed."
+        exit 1
+    fi
     echo -e "${GREEN}✅ Virtual environment created.${NC}"
+fi
+
+# Check if virtual environment was actually created
+if [ ! -f "venv/bin/activate" ]; then
+    echo -e "${RED}❌ Virtual environment activation script not found.${NC}"
+    echo -e "The virtual environment was not created correctly."
+    exit 1
 fi
 
 # Activate virtual environment
 echo -e "\n${BOLD}Activating virtual environment...${NC}"
 source venv/bin/activate
+if [ $? -ne 0 ]; then
+    echo -e "${RED}❌ Failed to activate virtual environment.${NC}"
+    exit 1
+fi
 echo -e "${GREEN}✅ Virtual environment activated.${NC}"
+
+# Verify pip is available
+if ! command -v pip >/dev/null 2>&1; then
+    echo -e "${RED}❌ pip command not found after activating virtual environment.${NC}"
+    echo -e "This suggests the virtual environment was not properly created or activated."
+    echo -e "Please try recreating the virtual environment or installing pip manually."
+    exit 1
+fi
 
 # Install dependencies
 echo -e "\n${BOLD}Installing dependencies...${NC}"
 pip install --upgrade pip
+if [ $? -ne 0 ]; then
+    echo -e "${RED}❌ Failed to upgrade pip. Attempting to continue anyway...${NC}"
+fi
+
 pip install -r requirements.txt
 if [ $? -ne 0 ]; then
     echo -e "${RED}❌ Failed to install dependencies. Check internet connection and requirements.txt file.${NC}"
