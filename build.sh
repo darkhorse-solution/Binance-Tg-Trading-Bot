@@ -1,5 +1,5 @@
 #!/bin/bash
-# Installation script for the Trading Bot
+# Installation script for the Bybit Telegram Trading Bot
 
 # Text formatting
 BOLD="\033[1m"
@@ -8,7 +8,7 @@ YELLOW="\033[0;33m"
 RED="\033[0;31m"
 NC="\033[0m" # No Color
 
-echo -e "${BOLD}🤖 Trading Bot Setup${NC}"
+echo -e "${BOLD}🤖 Bybit Telegram Trading Bot Setup${NC}"
 echo -e "======================================="
 
 # Check Python version
@@ -49,6 +49,10 @@ echo -e "${GREEN}✅ Virtual environment activated.${NC}"
 echo -e "\n${BOLD}Installing dependencies...${NC}"
 pip install --upgrade pip
 pip install -r requirements.txt
+if [ $? -ne 0 ]; then
+    echo -e "${RED}❌ Failed to install dependencies. Check internet connection and requirements.txt file.${NC}"
+    exit 1
+fi
 echo -e "${GREEN}✅ Dependencies installed.${NC}"
 
 # Create necessary directories
@@ -72,8 +76,56 @@ else
             echo -e "${YELLOW}⚠️ Please create .env file manually.${NC}"
         fi
     else
-        echo -e "${RED}❌ .env.sample file not found.${NC}"
-        echo -e "Please create .env file manually."
+        echo -e "${YELLOW}Creating basic .env.sample file...${NC}"
+        cat > .env.sample << 'EOL'
+BOT_TOKEN=YOUR_TELEGRAM_BOT_TOKEN
+SOURCE_CHANNEL_ID=YOUR_SOURCE_CHANNEL_ID
+TARGET_CHANNEL_ID=YOUR_TARGET_CHANNEL_ID
+API_ID=YOUR_TELEGRAM_API_ID
+API_HASH=YOUR_TELEGRAM_API_HASH
+BINANCE_API_KEY=YOUR_BINANCE_API_KEY
+BINANCE_API_SECRET_KEY=YOUR_BINANCE_API_SECRET_KEY
+
+# Risk management settings
+DEFAULT_RISK_PERCENT=2.0
+MAX_LEVERAGE=20
+
+# Trading settings
+ENABLE_AUTO_SL=true
+AUTO_SL_PERCENT=5.0
+DEFAULT_TP_PERCENT=20.0
+DEFAULT_SL_PERCENT=100.0
+
+# Logging settings
+LOG_LEVEL=INFO
+LOG_FILE=logs/trading_bot.log
+
+QUOTE_ASSET=USDT
+WALLET_RATIO=10
+
+# Profit reporting
+ENABLE_PROFIT_REPORTING=true
+
+# Position management
+CLOSE_POSITIONS_AFTER_TRADE=true
+POSITION_MONITOR_TIMEOUT=3600
+
+# Notification settings
+ENABLE_ENTRY_NOTIFICATIONS=true
+ENABLE_PROFIT_NOTIFICATIONS=true
+ENABLE_FAILURE_NOTIFICATIONS=true
+SEND_PROFIT_ONLY_FOR_MANUAL_EXITS=true
+EOL
+        echo -e "${GREEN}✅ .env.sample file created.${NC}"
+        
+        read -p "Do you want to create .env from the new template? (y/n): " create_env
+        if [[ $create_env == "y" || $create_env == "Y" ]]; then
+            cp .env.sample .env
+            echo -e "${GREEN}✅ .env file created from template.${NC}"
+            echo -e "${YELLOW}⚠️ Please edit the .env file with your configuration settings.${NC}"
+        else
+            echo -e "${YELLOW}⚠️ Please create .env file manually.${NC}"
+        fi
     fi
 fi
 
@@ -81,4 +133,10 @@ echo -e "\n${GREEN}${BOLD}Installation complete!${NC}"
 echo -e "\nTo start the bot, run:"
 echo -e "${BOLD}source venv/bin/activate${NC}"
 echo -e "${BOLD}python main.py${NC}"
-echo -e "\nEnsure you have configured your .env file with correct credentials before starting."
+echo -e "\n${YELLOW}⚠️ IMPORTANT:${NC} Ensure you have configured your .env file with correct credentials before starting."
+echo -e "Particularly these required settings:"
+echo -e "  - BOT_TOKEN: Your Telegram Bot token"
+echo -e "  - SOURCE_CHANNEL_ID: Channel ID to monitor for signals"
+echo -e "  - TARGET_CHANNEL_ID: Channel ID to send formatted signals"
+echo -e "  - API_ID & API_HASH: Your Telegram API credentials"
+echo -e "  - BINANCE_API_KEY & BINANCE_API_SECRET_KEY: Your Binance API credentials"
