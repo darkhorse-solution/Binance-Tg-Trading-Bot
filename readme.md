@@ -35,6 +35,13 @@ A robust, class-based Telegram bot for monitoring, parsing, and automatically ex
 
 ## Setup
 
+### Requirements
+
+- Python 3.7 or higher (automatically installed on Ubuntu/Debian systems if not already present)
+- Internet connection for downloading dependencies
+- Telegram account with API access
+- Bybit exchange account with API access
+
 ### Quick Setup
 
 1. Clone the repository
@@ -48,6 +55,13 @@ A robust, class-based Telegram bot for monitoring, parsing, and automatically ex
    chmod +x build.sh
    ./build.sh
    ```
+   
+   The script will:
+   - Check if Python 3 is installed, and attempt to install it on Ubuntu/Debian systems if needed
+   - Create a virtual environment
+   - Install required dependencies
+   - Create necessary directories
+   - Help you set up the .env configuration file
    
 3. Edit the .env file with your personal credentials
    ```bash

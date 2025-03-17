@@ -17,9 +17,56 @@ python_version=$(python3 --version 2>&1)
 if [[ $python_version =~ "Python 3" ]]; then
     echo -e "${GREEN}✅ Python 3 is installed: $python_version${NC}"
 else
-    echo -e "${RED}❌ Python 3 is required but not found.${NC}"
-    echo -e "Please install Python 3.7 or higher and try again."
-    exit 1
+    echo -e "${YELLOW}⚠️ Python 3 is not found.${NC}"
+    echo -e "Attempting to install Python 3 on Ubuntu..."
+    
+    # Check if we're on Ubuntu/Debian
+    if [ -f /etc/lsb-release ] || [ -f /etc/debian_version ]; then
+        echo -e "Ubuntu/Debian detected. Installing Python 3..."
+        
+        # Check if user has sudo privileges
+        if command -v sudo >/dev/null 2>&1; then
+            # Add deadsnakes PPA for latest Python versions
+            echo -e "${YELLOW}Adding deadsnakes PPA for latest Python versions...${NC}"
+            sudo apt-get update
+            sudo apt-get install -y software-properties-common
+            sudo add-apt-repository -y ppa:deadsnakes/ppa
+            sudo apt-get update
+            
+            # Install Python 3.10 or later
+            echo -e "${YELLOW}Installing Python 3.10...${NC}"
+            sudo apt-get install -y python3.10 python3.10-venv python3.10-dev python3-pip
+            
+            # Create symbolic link if needed
+            if ! command -v python3 >/dev/null 2>&1; then
+                echo -e "${YELLOW}Creating python3 symbolic link...${NC}"
+                sudo ln -sf /usr/bin/python3.10 /usr/bin/python3
+            fi
+            
+            echo -e "${GREEN}✅ Python 3 has been installed.${NC}"
+            
+            # Verify the installation
+            python_version=$(python3 --version 2>&1)
+            if [[ $python_version =~ "Python 3" ]]; then
+                echo -e "${GREEN}✅ Python 3 is now installed: $python_version${NC}"
+            else
+                echo -e "${RED}❌ Failed to install Python 3. Please install manually.${NC}"
+                exit 1
+            fi
+        else
+            echo -e "${RED}❌ Sudo privileges required to install Python. Please run:${NC}"
+            echo -e "sudo apt-get update"
+            echo -e "sudo apt-get install -y software-properties-common"
+            echo -e "sudo add-apt-repository -y ppa:deadsnakes/ppa"
+            echo -e "sudo apt-get update"
+            echo -e "sudo apt-get install -y python3.10 python3.10-venv python3.10-dev python3-pip"
+            exit 1
+        fi
+    else
+        echo -e "${RED}❌ Python 3 is required but not found and your OS is not Ubuntu/Debian.${NC}"
+        echo -e "Please install Python 3.7 or higher manually and try again."
+        exit 1
+    fi
 fi
 
 # Create virtual environment
