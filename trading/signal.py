@@ -2,8 +2,8 @@ import re
 from utils.logger import logger
 
 def extract_pair(s):
-    # Extract only uppercase letters
-    return "".join(re.findall(r"[A-Z]+", s))
+    # Extract uppercase letters AND numbers (fixed version)
+    return "".join(re.findall(r"[A-Z0-9]+", s))
 
 class SignalParser:
     """

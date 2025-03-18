@@ -1,183 +1,75 @@
 # utils/logger.py
 import logging
+from logging.handlers import RotatingFileHandler
 import os
-from datetime import datetime
 from pathlib import Path
 
-
-class Logger:
+def setup_logging(config):
     """
-    Logger class for the trading bot.
+    Set up all loggers with a single configuration function
     """
-
-    def __init__(self, name='trading_bot', log_level=logging.INFO, log_file=None):
-        """
-        Initialize the logger.
-
-        Args:
-            name (str): Logger name
-            log_level (int): Logging level
-            log_file (str, optional): Path to log file
-        """
-        self._logger = logging.getLogger(name)
-        self._logger.setLevel(log_level)
-        self._log_file = log_file
-        self._setup_handlers()
-
-    def _setup_handlers(self):
-        """Set up logging handlers for console and file if specified."""
-        # Clear any existing handlers
-        if self._logger.handlers:
-            self._logger.handlers.clear()
-
-        # Create console handler
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(self._logger.level)
-
-        # Create formatter
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    # Create logs directory
+    log_dir = "logs"
+    Path(log_dir).mkdir(exist_ok=True)
+    
+    # Configure root logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(config.get_log_level())
+    
+    # Console handler for all logs
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(config.get_log_level())
+    console_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    console_handler.setFormatter(console_formatter)
+    root_logger.addHandler(console_handler)
+    
+    # Create specialized loggers with a single approach
+    loggers = {
+        'main': {
+            'name': 'trading_bot',
+            'file': os.path.join(log_dir, config.LOG_FILE or "trading_bot.log"),
+            'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        },
+        'failures': {
+            'name': 'trading_failures',
+            'file': os.path.join(log_dir, "trading_failures.log"),
+            'format': '%(asctime)s - TRADING FAILURE - %(message)s'
+        },
+        'profits': {
+            'name': 'trade_profits',
+            'file': os.path.join(log_dir, "trade_profits.log"),
+            'format': '%(asctime)s - TRADE RESULT - %(message)s'
+        }
+    }
+    
+    # Set up each logger
+    configured_loggers = {}
+    for key, cfg in loggers.items():
+        logger = logging.getLogger(cfg['name'])
+        logger.setLevel(config.get_log_level())
+        
+        # Add file handler
+        file_handler = RotatingFileHandler(
+            cfg['file'], 
+            maxBytes=10*1024*1024,  # 10MB
+            backupCount=5
         )
-        console_handler.setFormatter(formatter)
-
-        # Add console handler to logger
-        self._logger.addHandler(console_handler)
-
-        # Add file handler if log file is specified
-        if self._log_file:
-            # Create logs directory if it doesn't exist
-            log_dir = os.path.dirname(self._log_file)
-            if log_dir and not os.path.exists(log_dir):
-                os.makedirs(log_dir)
-
-            # Create file handler
-            file_handler = logging.FileHandler(self._log_file)
-            file_handler.setLevel(self._logger.level)
-            file_handler.setFormatter(formatter)
-
-            # Add file handler to logger
-            self._logger.addHandler(file_handler)
-
-    def set_level(self, level):
-        """
-        Set the logging level.
-
-        Args:
-            level (int): Logging level
-        """
-        self._logger.setLevel(level)
-        for handler in self._logger.handlers:
-            handler.setLevel(level)
-
-    def debug(self, message):
-        """Log a debug message."""
-        self._logger.debug(message)
-
-    def info(self, message):
-        """Log an info message."""
-        self._logger.info(message)
-
-    def warning(self, message):
-        """Log a warning message."""
-        self._logger.warning(message)
-
-    def error(self, message):
-        """Log an error message."""
-        self._logger.error(message)
-
-    def critical(self, message):
-        """Log a critical message."""
-        self._logger.critical(message)
-
-    def exception(self, message):
-        """Log an exception message with traceback."""
-        self._logger.exception(message)
-
-
-def create_trading_failures_logger():
-    """
-    Create a specialized logger for tracking trading failures.
+        file_handler.setLevel(config.get_log_level())
+        formatter = logging.Formatter(cfg['format'])
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+        
+        configured_loggers[key] = logger
     
-    Returns:
-        Logger: Configured logger instance
-    """
-    # Create logs directory if it doesn't exist
-    log_dir = "logs"
-    Path(log_dir).mkdir(exist_ok=True)
-    
-    log_file = os.path.join(log_dir, "trading_failures.log")
-    
-    # Create a custom logger
-    failures_logger = logging.getLogger("trading_failures")
-    failures_logger.setLevel(logging.INFO)
-    
-    # Clear any existing handlers
-    if failures_logger.handlers:
-        failures_logger.handlers.clear()
-    
-    # Create handlers
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setLevel(logging.INFO)
-    
-    # Create formatters
-    formatter = logging.Formatter(
-        '%(asctime)s - TRADING FAILURE - %(message)s'
-    )
-    file_handler.setFormatter(formatter)
-    
-    # Add handlers to logger
-    failures_logger.addHandler(file_handler)
-    
-    return failures_logger
+    return configured_loggers
 
-
-def create_profit_logger():
-    """
-    Create a specialized logger for tracking trade profits.
-    
-    Returns:
-        Logger: Configured logger instance
-    """
-    # Create logs directory if it doesn't exist
-    log_dir = "logs"
-    Path(log_dir).mkdir(exist_ok=True)
-    
-    log_file = os.path.join(log_dir, "trade_profits.log")
-    
-    # Create a custom logger
-    profit_logger = logging.getLogger("trade_profits")
-    profit_logger.setLevel(logging.INFO)
-    
-    # Clear any existing handlers
-    if profit_logger.handlers:
-        profit_logger.handlers.clear()
-    
-    # Create handlers
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setLevel(logging.INFO)
-    
-    # Create formatters
-    formatter = logging.Formatter(
-        '%(asctime)s - TRADE RESULT - %(message)s'
-    )
-    file_handler.setFormatter(formatter)
-    
-    # Add handlers to logger
-    profit_logger.addHandler(file_handler)
-    
-    return profit_logger
-
-
-# Import configuration for log settings
+# Import configuration
 from utils.config import Config
 
-# Create logger instances
-logger = Logger(
-    name='trading_bot',
-    log_level=Config.get_log_level(),
-    log_file=Config.LOG_FILE
-)
+# Initialize all loggers at once
+loggers = setup_logging(Config)
 
-# Initialize the specialized loggers
-trading_failures_logger = create_trading_failures_logger()
-profit_logger = create_profit_logger()
+# Export the loggers for use in the application
+logger = loggers['main']
+trading_failures_logger = loggers['failures'] 
+profit_logger = loggers['profits']

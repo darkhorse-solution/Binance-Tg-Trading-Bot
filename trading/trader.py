@@ -6,6 +6,7 @@ from utils.logger import logger, trading_failures_logger, profit_logger
 from typing import Dict, List, Optional, Any, Tuple
 from trading.risk import RiskManager
 from utils.config import Config
+import re
 
 
 class BinanceTrader:
@@ -852,60 +853,6 @@ class BinanceTrader:
         ))
         logger.info(f"Set up order execution monitor for {symbol}")
 
-    async def send_entry_message(self, symbol: str, position_type: str, leverage: int, 
-                            entry_price: float, sl_price: float, tp_price: float,
-                            position_size: float):
-        """
-        Send a message when a new position is entered.
-        """
-        # Add debugging
-        logger.info(f"Attempting to send entry message for {symbol}")
-        logger.info(f"Telegram client set: {self.telegram_client is not None}")
-        logger.info(f"Target channel ID: {self.target_channel_id}")
-        logger.info(f"Entry notifications enabled: {Config.ENABLE_ENTRY_NOTIFICATIONS}")
-        
-        if not self.telegram_client or not self.target_channel_id or not Config.ENABLE_ENTRY_NOTIFICATIONS:
-            logger.warning(f"Cannot send entry message: Telegram client: {self.telegram_client is not None}, " + 
-                        f"Channel: {self.target_channel_id}, Notifications: {Config.ENABLE_ENTRY_NOTIFICATIONS}")
-            return
-            
-        try:
-            # Calculate SL and TP percentages
-            if position_type == 'LONG':
-                sl_percent = ((entry_price - sl_price) / entry_price) * 100 * leverage
-                tp_percent = ((tp_price - entry_price) / entry_price) * 100 * leverage
-                emoji = "🟢"
-            else:  # SHORT
-                sl_percent = ((sl_price - entry_price) / entry_price) * 100 * leverage
-                tp_percent = ((entry_price - tp_price) / entry_price) * 100 * leverage
-                emoji = "🔴"
-                
-            # Format the message
-            message = (
-                f"{emoji} NEW TRADE ENTRY\n\n"
-                f"Pair: {symbol}\n"
-                f"Position: {position_type}\n"
-                f"Leverage: {leverage}x\n"
-                f"Entry Price: {entry_price:.4f}\n"
-                f"Size: {position_size:.4f}\n\n"
-                f"Stop Loss: {sl_price:.4f} ({sl_percent:.2f}%)\n"
-                f"Take Profit: {tp_price:.4f} ({tp_percent:.2f}%)\n\n"
-                f"#{position_type.lower()} #{symbol}"
-            )
-            
-            # Log the message for debugging
-            logger.info(f"Sending entry message to channel {self.target_channel_id}")
-            
-            # Send the message
-            await self.telegram_client.send_message(self.target_channel_id, message)
-            logger.info(f"Successfully sent entry message for {symbol}")
-            
-        except Exception as e:
-            logger.error(f"Error sending entry message: {e}")
-            # Print stack trace for debugging
-            import traceback
-            logger.error(traceback.format_exc())
-            
     async def execute_signal(self, signal: Dict) -> Dict:
         """
         Execute trades based on a parsed signal.
@@ -919,7 +866,6 @@ class BinanceTrader:
         symbol = signal['binance_symbol']
         position_type = signal['position_type']
         entry_price = signal['entry_price']
-        requested_leverage = signal['leverage']
         stop_loss = signal.get('stop_loss')
         take_profit_levels = signal['take_profit_levels']
         original_message = signal.get('original_message', 'Unknown message')
@@ -936,7 +882,7 @@ class BinanceTrader:
 
         try:
             # Step 1: Check the maximum supported leverage
-            max_leverage = self.get_max_leverage(symbol)
+            max_leverage = min(self.get_max_leverage(symbol), int(Config.MAX_LEVERAGE))
             
             if max_leverage == 0:
                 # Symbol is not supported
@@ -949,32 +895,10 @@ class BinanceTrader:
                 results['errors'].append(f"Symbol {symbol} not supported on Binance Futures")
                 return results
                 
-            # Step 2: Apply the minimum of requested leverage and max supported leverage
-            effective_leverage = min(requested_leverage, max_leverage)
-            
-            if effective_leverage < requested_leverage:
-                message = f"Requested leverage {requested_leverage}x exceeds maximum supported leverage {max_leverage}x for {symbol}. Using {effective_leverage}x instead."
-                logger.warning(message)
-                results['warnings'].append(message)
-            
-            # Step 3: Set leverage for the symbol
-            try:
-                self.client.futures_change_leverage(symbol=symbol, leverage=effective_leverage)
-                logger.info(f"Set leverage for {symbol} to {effective_leverage}x")
-            except Exception as e:
-                await self.handle_trading_failure(
-                    symbol, 
-                    "Failed to set leverage", 
-                    e, 
-                    original_message
-                )
-                results['errors'].append(f"Failed to set leverage for {symbol}: {str(e)}")
-                return results
-
-            # Step 4: Calculate position size using risk management
+            # Step 2: Calculate position size using risk management
             try:
                 position_size, _ = self.calculate_coin_amount_to_buy(
-                    symbol, effective_leverage
+                    symbol, max_leverage
                 )
                 results['position_size'] = position_size
             except Exception as e:
@@ -987,7 +911,7 @@ class BinanceTrader:
                 results['errors'].append(f"Position sizing error: {str(e)}")
                 return results
 
-            # Step 5: Create the main entry order
+            # Step 3: Create the main entry order
             side = "BUY" if position_type == 'LONG' else "SELL"
             try:
                 entry_order = await self._create_entry_order(symbol, side, position_size, entry_price)
@@ -1006,15 +930,15 @@ class BinanceTrader:
                 results['errors'].append(f"Entry order error: {str(e)}")
                 return results
 
-            # Step 6: Create take profit and stop loss orders
+            # Step 4: Create take profit and stop loss orders
             try:
                 tp_result = await self._create_take_profit_order(
-                    symbol, side, position_size, effective_leverage, entry_price, Config.DEFAULT_TP_PERCENT
+                    symbol, side, position_size, max_leverage, entry_price, Config.DEFAULT_TP_PERCENT
                 )
                 results['take_profit_orders'].append(tp_result)
                 
                 sl_result = await self._create_stop_loss_order(
-                    symbol, side, position_size, effective_leverage, entry_price, Config.DEFAULT_SL_PERCENT
+                    symbol, side, position_size, max_leverage, entry_price, Config.DEFAULT_SL_PERCENT
                 )
                 results['stop_loss_order'] = sl_result
                 
@@ -1027,7 +951,7 @@ class BinanceTrader:
                     await self.send_entry_message(
                         symbol=symbol,
                         position_type=position_type,
-                        leverage=effective_leverage,
+                        leverage=max_leverage,
                         entry_price=entry_price,
                         sl_price=sl_price,
                         tp_price=tp_price,
@@ -1039,7 +963,7 @@ class BinanceTrader:
                 results['warnings'].append(f"Created entry order, but failed to set TP/SL: {str(e)}")
                 # We still return success since the main order was placed
 
-            # Step 7: Set up order monitoring to clean up orders when SL or TP is triggered
+            # Step 5: Set up order monitoring to clean up orders when SL or TP is triggered
             if (results['entry_order'] and 'orderId' in results['entry_order'] and
                 results['stop_loss_order'] and 'orderId' in results['stop_loss_order'] and
                 results['take_profit_orders'] and 'orderId' in results['take_profit_orders'][0]):
@@ -1052,7 +976,7 @@ class BinanceTrader:
                     entry_price,
                     position_size,
                     position_type,
-                    effective_leverage
+                    max_leverage
                 )
                 results['order_monitoring'] = True
 
@@ -1075,3 +999,41 @@ class BinanceTrader:
             
             results['errors'].append(error_msg)
             return results
+
+    def parse(self, message: str):
+        try:
+            # Split message into lines and remove empty lines
+            lines = [line.strip() for line in message.split('\n') if line.strip()]
+
+            # First line should contain trading pair and position type
+            first_line = lines[0]
+
+            # Look for trading pair (any word containing /)
+            symbol = next((word for word in first_line.split() if '/' in word), None)
+            symbol = "".join(re.findall(r"[A-Z0-9]+", symbol))  # Keep numbers and uppercase letters
+            if not symbol:
+                return None
+
+            # Position type
+            position_type = 'LONG' if 'Long' in first_line else 'SHORT' if 'Short' in first_line else None
+            if not position_type:
+                return None
+
+            # Rest of your parsing logic for entry price, stop loss, take profits...
+            # ...
+
+            # Convert symbol format from X/Y to XY for Binance
+            binance_symbol = symbol.replace('/', '')
+
+            return {
+                'symbol': symbol,
+                'binance_symbol': binance_symbol,
+                'position_type': position_type,
+                'entry_price': entry_price,
+                'stop_loss': stop_loss,
+                'take_profit_levels': tp_levels,
+                'original_message': message
+            }
+        except Exception as e:
+            logger.error(f"Error parsing message: {e}")
+            return None

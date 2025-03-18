@@ -41,6 +41,7 @@ class RiskManager:
         try:
             # Cap leverage to maximum
             effective_leverage = min(leverage, self.max_leverage)
+            print(f"Effective leverage: {effective_leverage}")
 
             # Calculate risk amount (how much we're willing to lose on this trade)
             risk_amount = account_balance * self.default_risk_percent
