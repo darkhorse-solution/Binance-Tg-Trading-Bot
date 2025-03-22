@@ -340,7 +340,7 @@ class BinanceTrader:
                 symbol=symbol,
                 side=side,
                 type="MARKET",  # Use correct string constant
-                quantity=quantity
+                quantity=quantity,
             )
 
             logger.info(f"Created entry order for {symbol}, {side} at {price}: {order['orderId']}")
@@ -853,6 +853,34 @@ class BinanceTrader:
         ))
         logger.info(f"Set up order execution monitor for {symbol}")
 
+    async def set_leverage_for_symbol(self, symbol: str, leverage: int) -> bool:
+        """
+        Set the leverage for a specific symbol on Binance Futures.
+        
+        Args:
+            symbol (str): Trading symbol
+            leverage (int): Leverage to set
+            
+        Returns:
+            bool: True if leverage was set successfully, False otherwise
+        """
+        try:
+            response = self.client.futures_change_leverage(
+                symbol=symbol, 
+                leverage=leverage
+            )
+            
+            actual_leverage = int(response['leverage'])
+            logger.info(f"Set leverage for {symbol} to {actual_leverage}x")
+            
+            # Update the cache with the new leverage
+            self._leverage_cache[symbol] = actual_leverage
+            
+            return True
+        except Exception as e:
+            logger.error(f"Failed to set leverage for {symbol} to {leverage}x: {e}")
+            return False
+
     async def execute_signal(self, signal: Dict) -> Dict:
         """
         Execute trades based on a parsed signal.
@@ -895,6 +923,18 @@ class BinanceTrader:
                 results['errors'].append(f"Symbol {symbol} not supported on Binance Futures")
                 return results
                 
+            # NEW STEP: Set the leverage on Binance
+            leverage_set = await self.set_leverage_for_symbol(symbol, max_leverage)
+            if not leverage_set:
+                await self.handle_trading_failure(
+                    symbol, 
+                    "Failed to set leverage on Binance", 
+                    Exception("Leverage setting failed"), 
+                    original_message
+                )
+                results['errors'].append(f"Failed to set leverage to {max_leverage}x for {symbol}")
+                return results
+            
             # Step 2: Calculate position size using risk management
             try:
                 position_size, _ = self.calculate_coin_amount_to_buy(
