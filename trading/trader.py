@@ -301,26 +301,42 @@ class BinanceTrader:
 
     def calculate_coin_amount_to_buy(self, pair, leverage):
         """
-        calculate coin amount based on wallet ratio and leverage, coin price and set with precision_quantity
-        :param pair: coin symbol pair ex: BNBUSDT
-        :return: coin amount and coin price
+        Calculate coin amount based on either wallet ratio or constant amount,
+        depending on configuration setting.
+        
+        Args:
+            pair (str): coin symbol pair ex: BNBUSDT
+            leverage (int): leverage value
+            
+        Returns:
+            tuple: (coin_amount, coin_price)
         """
         try:
             QUOTE_ASSET = Config.QUOTE_ASSET
-            WALLET_RATIO = Config.WALLET_RATIO
-            account_balance = self.get_balance_in_quote(QUOTE_ASSET)
-            amount_to_trade_in_quote = ((account_balance / 100) * WALLET_RATIO) * leverage
+            trading_mode = Config.TRADING_MODE.lower()
+            
+            if trading_mode == "fixed":
+                # Fixed amount mode
+                CONSTANT_AMOUNT = Config.CONSTANT_AMOUNT
+                amount_to_trade_in_quote = CONSTANT_AMOUNT * leverage
+                logger.info(f"Using fixed amount mode: {CONSTANT_AMOUNT} {QUOTE_ASSET}")
+            else:
+                # Wallet ratio mode (default)
+                WALLET_RATIO = Config.WALLET_RATIO
+                account_balance = self.get_balance_in_quote(QUOTE_ASSET)
+                amount_to_trade_in_quote = ((account_balance / 100) * WALLET_RATIO) * leverage
+                logger.info(f"Using wallet ratio mode: {WALLET_RATIO}% of {account_balance} {QUOTE_ASSET}")
 
             coin_price = self.get_last_price(pair)
             coin_amount = amount_to_trade_in_quote / coin_price
             coin_amount = self.get_precise_quantity(pair, coin_amount)
-            logger.info(f"amount to buy {coin_amount} x {leverage} * {coin_price}")
+            logger.info(f"Amount to buy: {coin_amount} × {leverage} × {coin_price}")
             return coin_amount, coin_price
 
         except Exception as e:
             logger.error(f'calculate_coin_amount_to_buy {e}')
             raise e
-
+    
     async def _create_entry_order(self, symbol: str, side: str,
                                   quantity: float, price: float) -> Dict:
         """

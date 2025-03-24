@@ -52,8 +52,10 @@ class Config:
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
     LOG_FILE = os.getenv("LOG_FILE", "logs/trading_bot.log")
 
-    # Wallet settings
+    # Trading amount settings
+    TRADING_MODE = os.getenv("TRADING_MODE", "ratio")  # "ratio" or "fixed"
     WALLET_RATIO = float(os.getenv("WALLET_RATIO", "10"))
+    CONSTANT_AMOUNT = float(os.getenv("CONSTANT_AMOUNT", "100.0"))
     QUOTE_ASSET = os.getenv("QUOTE_ASSET", "USDT")
 
     @classmethod
@@ -87,6 +89,18 @@ class Config:
             errors["DEFAULT_RISK_PERCENT"] = "Risk percentage must be between 0.1 and 10"
         if cls.MAX_LEVERAGE <= 0 or cls.MAX_LEVERAGE > 125:
             errors["MAX_LEVERAGE"] = "Max leverage must be between 1 and 125"
+            
+        # Validate trading mode
+        if cls.TRADING_MODE.lower() not in ["ratio", "fixed"]:
+            errors["TRADING_MODE"] = "Trading mode must be either 'ratio' or 'fixed'"
+            
+        # Validate wallet ratio if in ratio mode
+        if cls.TRADING_MODE.lower() == "ratio" and cls.WALLET_RATIO <= 0:
+            errors["WALLET_RATIO"] = "Wallet ratio must be greater than 0"
+            
+        # Validate constant amount if in fixed mode
+        if cls.TRADING_MODE.lower() == "fixed" and cls.CONSTANT_AMOUNT <= 0:
+            errors["CONSTANT_AMOUNT"] = "Constant amount must be greater than 0"
 
         return errors
 
