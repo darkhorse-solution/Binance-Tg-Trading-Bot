@@ -46,7 +46,6 @@ class Config:
     ENABLE_ENTRY_NOTIFICATIONS = os.getenv("ENABLE_ENTRY_NOTIFICATIONS", "true").lower() == "true"
     ENABLE_PROFIT_NOTIFICATIONS = os.getenv("ENABLE_PROFIT_NOTIFICATIONS", "true").lower() == "true"
     ENABLE_FAILURE_NOTIFICATIONS = os.getenv("ENABLE_FAILURE_NOTIFICATIONS", "true").lower() == "true"
-    SEND_PROFIT_ONLY_FOR_MANUAL_EXITS = os.getenv("SEND_PROFIT_ONLY_FOR_MANUAL_EXITS", "true").lower() == "true"
 
     # Log settings
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")

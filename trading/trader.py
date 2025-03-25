@@ -1,5 +1,6 @@
 import math
 import asyncio
+import time
 from datetime import datetime, timedelta
 from binance.client import Client
 from utils.logger import logger, trading_failures_logger, profit_logger
@@ -42,6 +43,9 @@ class BinanceTrader:
         
         # Constants
         self.default_max_leverage = max_leverage
+
+        # Dictionary to track ongoing monitoring tasks
+        self._monitor_tasks = {}
 
         # Initialize caches with common symbols at startup
         self._prefetch_common_symbols()
@@ -336,7 +340,7 @@ class BinanceTrader:
         except Exception as e:
             logger.error(f'calculate_coin_amount_to_buy {e}')
             raise e
-    
+
     async def _create_entry_order(self, symbol: str, side: str,
                                   quantity: float, price: float) -> Dict:
         """
@@ -648,7 +652,7 @@ class BinanceTrader:
             logger.error(f"Error sending profit message: {e}")
 
     async def monitor_order_execution(self, symbol: str, entry_order_id: int, sl_order_id: int, tp_order_id: int, 
-                                 entry_price: float, position_size: float, position_type: str, leverage: int):
+                             entry_price: float, position_size: float, position_type: str, leverage: int):
         """
         Monitor order execution and clean up related orders when one gets triggered.
         Also sends profit result messages when the trade is completed.
@@ -664,147 +668,154 @@ class BinanceTrader:
             leverage (int): Leverage used
         """
         try:
-            # First wait for entry order to be filled
-            entry_filled = False
-            check_attempts = 0
-            actual_position_size = position_size  # Default to provided size
+            # For positions that already exist, we don't need to check entry order
+            check_entry = entry_order_id < 1000000000000  # If it's a real order ID, not our dummy timestamp
             
-            while not entry_filled and check_attempts < 12:  # Check for 2 minutes
-                try:
-                    order_status = self.client.futures_get_order(symbol=symbol, orderId=entry_order_id)
-                    if order_status['status'] == 'FILLED':
-                        entry_filled = True
-                        
-                        # Get actual filled price from the order
-                        try:
-                            actual_entry_price = float(order_status['avgPrice'])
-                            if actual_entry_price > 0:
-                                entry_price = actual_entry_price
-                                logger.info(f"Updated entry price to actual filled price: {entry_price}")
-                        except (KeyError, ValueError) as e:
-                            logger.warning(f"Could not get actual entry price: {e}")
-                        
-                        # Get actual filled quantity from the order
-                        try:
-                            actual_position_size = float(order_status['executedQty'])
-                            if actual_position_size > 0:
-                                position_size = actual_position_size
-                                logger.info(f"Updated position size to actual filled quantity: {position_size}")
-                        except (KeyError, ValueError) as e:
-                            logger.warning(f"Could not get actual position size: {e}")
-                        
-                        logger.info(f"Entry order {entry_order_id} for {symbol} has been filled at {entry_price}")
-                    else:
-                        await asyncio.sleep(10)  # Check every 10 seconds
+            if check_entry:
+                # Wait for entry order to be filled
+                entry_filled = False
+                check_attempts = 0
+                
+                while not entry_filled and check_attempts < 6:  # Check for 3 minutes max
+                    try:
+                        order_status = self.client.futures_get_order(symbol=symbol, orderId=entry_order_id)
+                        if order_status['status'] == 'FILLED':
+                            entry_filled = True
+                            
+                            # Get actual filled price and quantity
+                            try:
+                                actual_entry_price = float(order_status['avgPrice'])
+                                if actual_entry_price > 0:
+                                    entry_price = actual_entry_price
+                            except (KeyError, ValueError):
+                                pass
+                                
+                            try:
+                                actual_position_size = float(order_status['executedQty'])
+                                if actual_position_size > 0:
+                                    position_size = actual_position_size
+                            except (KeyError, ValueError):
+                                pass
+                                
+                            logger.info(f"Entry order {entry_order_id} filled at {entry_price}")
+                        else:
+                            await asyncio.sleep(30)
+                            check_attempts += 1
+                    except Exception as e:
+                        logger.error(f"Error checking entry order: {e}")
+                        await asyncio.sleep(30)
                         check_attempts += 1
-                except Exception as e:
-                    logger.error(f"Error checking entry order status: {e}")
-                    await asyncio.sleep(10)
-                    check_attempts += 1
-            
-            if not entry_filled:
-                logger.warning(f"Entry order {entry_order_id} for {symbol} was not filled after 2 minutes")
-                return
+                
+                if not entry_filled:
+                    logger.warning(f"Entry order {entry_order_id} not filled after timeout")
+                    # Continue monitoring anyway, in case it gets filled later
+            else:
+                # For existing positions, consider entry already filled
+                entry_filled = True
+                logger.info(f"Monitoring existing position for {symbol} at {entry_price}")
                     
-            # Entry is filled, now monitor SL and TP orders
+            # Monitor the position until it's closed
             position_closed = False
             exit_price = 0
             exit_type = "unknown"
-            
-            # Keep track of whether we've processed the exit already to prevent double processing
             exit_processed = False
             
+            # Dynamic sleep time management
+            base_sleep_time = 20  # Start with 20 seconds between checks
+            check_count = 0
+            
             while not position_closed:
+                # Adjust sleep time based on check count (max 2 minutes)
+                sleep_time = min(base_sleep_time + (check_count // 5) * 10, 120)
+                check_count += 1
+                
                 try:
-                    # Check SL order
+                    # Check if SL order was filled
                     try:
                         sl_status = self.client.futures_get_order(symbol=symbol, orderId=sl_order_id)
                         if sl_status['status'] == 'FILLED' and not exit_processed:
-                            # SL was triggered - position is closed, cancel TP
-                            logger.info(f"Stop loss triggered for {symbol}, canceling take profit order")
                             position_closed = True
                             exit_type = "stop_loss"
-                            exit_processed = True  # Mark as processed
+                            exit_processed = True
                             
-                            # Get the exit price - use the actual execution price if available
+                            # Get the exit price
                             if 'avgPrice' in sl_status and float(sl_status['avgPrice']) > 0:
                                 exit_price = float(sl_status['avgPrice'])
                             else:
-                                # Fallback to the stop price
                                 exit_price = float(sl_status['stopPrice'])
                             
-                            # Cancel the take profit order
+                            # Cancel TP order
                             try:
                                 self.client.futures_cancel_order(symbol=symbol, orderId=tp_order_id)
-                                logger.info(f"Successfully canceled TP order {tp_order_id} for {symbol}")
                             except Exception as e:
-                                logger.error(f"Error canceling TP order after SL was hit: {e}")
+                                logger.error(f"Error canceling TP after SL hit: {e}")
                     except Exception as e:
-                        # Order might not exist anymore
+                        # If we can't check SL, it might be gone/filled
                         logger.warning(f"Could not check SL order {sl_order_id}: {e}")
                     
-                    # If position already closed by SL, don't check TP
                     if position_closed:
                         break
-                        
-                    # Check TP order
+                    
+                    # Small pause between API calls
+                    await asyncio.sleep(1)
+                    
+                    # Check if TP order was filled
                     try:
                         tp_status = self.client.futures_get_order(symbol=symbol, orderId=tp_order_id)
                         if tp_status['status'] == 'FILLED' and not exit_processed:
-                            # TP was triggered - position is closed, cancel SL
-                            logger.info(f"Take profit triggered for {symbol}, canceling stop loss order")
                             position_closed = True
                             exit_type = "take_profit"
-                            exit_processed = True  # Mark as processed
+                            exit_processed = True
                             
-                            # Get the exit price - use the actual execution price if available
+                            # Get the exit price
                             if 'avgPrice' in tp_status and float(tp_status['avgPrice']) > 0:
                                 exit_price = float(tp_status['avgPrice'])
                             else:
-                                # Fallback to the stop price
                                 exit_price = float(tp_status['stopPrice'])
                             
-                            # Cancel the stop loss order
+                            # Cancel SL order
                             try:
                                 self.client.futures_cancel_order(symbol=symbol, orderId=sl_order_id)
-                                logger.info(f"Successfully canceled SL order {sl_order_id} for {symbol}")
                             except Exception as e:
-                                logger.error(f"Error canceling SL order after TP was hit: {e}")
+                                logger.error(f"Error canceling SL after TP hit: {e}")
                     except Exception as e:
-                        # Order might not exist anymore
+                        # If we can't check TP, it might be gone/filled
                         logger.warning(f"Could not check TP order {tp_order_id}: {e}")
                     
-                    # Check if the position still exists
-                    if not position_closed:
-                        position_info = self.client.futures_position_information(symbol=symbol)
-                        position = next((p for p in position_info if p['symbol'] == symbol and float(p['positionAmt']) != 0), None)
-                        
-                        if not position and not exit_processed:
-                            # Position was closed by some other means
-                            logger.info(f"Position for {symbol} was closed by other means, canceling all orders")
-                            position_closed = True
-                            exit_type = "manual_or_liquidation"
-                            exit_processed = True  # Mark as processed
+                    if position_closed:
+                        break
+                    
+                    # Less frequent position check (once every 3 iterations)
+                    if check_count % 3 == 0:
+                        # Check if position still exists
+                        try:
+                            position_info = self.client.futures_position_information(symbol=symbol)
+                            position = next((p for p in position_info if p['symbol'] == symbol 
+                                            and float(p['positionAmt']) != 0), None)
                             
-                            # Try to get the last price as exit price
-                            try:
-                                exit_price = self.get_last_price(symbol)
-                                logger.info(f"Using current price as exit price: {exit_price}")
-                            except Exception as e:
-                                logger.error(f"Could not get last price: {e}")
-                                # If we can't get the current price, use entry price as fallback
-                                exit_price = entry_price
+                            if not position and not exit_processed:
+                                position_closed = True
+                                exit_type = "manual_or_liquidation"
+                                exit_processed = True
                                 
-                            await self.cancel_all_open_orders(symbol)
+                                # Get current price as exit price
+                                try:
+                                    exit_price = self.get_last_price(symbol)
+                                except:
+                                    exit_price = entry_price  # Fallback to entry price
+                                
+                                await self.cancel_all_open_orders(symbol)
+                        except Exception as e:
+                            logger.error(f"Error checking position: {e}")
                     
                     if not position_closed:
-                        await asyncio.sleep(10)  # Check every 10 seconds
+                        await asyncio.sleep(sleep_time)
                         
                 except Exception as e:
-                    logger.error(f"Error in order execution monitor: {e}")
-                    await asyncio.sleep(10)
-                    
-            # Position is closed and not yet processed
+                    logger.error(f"Error in monitoring loop: {e}")
+                    await asyncio.sleep(60)  # Sleep longer on error
+            
+            # Position is now closed, calculate and report profit
             if position_closed and exit_price > 0 and exit_processed:
                 try:
                     # Calculate profit
@@ -817,10 +828,9 @@ class BinanceTrader:
                         leverage=leverage
                     )
                     
-                    # Add exit type to the profit data
                     profit_data['exit_type'] = exit_type
                     
-                    # Log the profit information regardless of exit type
+                    # Log profit details
                     profit_message = (
                         f"{symbol} {position_type} - {exit_type.upper()} - " +
                         f"Entry: {entry_price:.4f}, Exit: {exit_price:.4f}, " +
@@ -828,18 +838,15 @@ class BinanceTrader:
                     )
                     from utils.logger import profit_logger
                     profit_logger.info(profit_message)
-                    logger.info(f"Profit calculation for {symbol}: {profit_data['percentage_profit']:.2f}%")
                     
-                    # Check the config option to determine if we should send a message
-                    if not Config.SEND_PROFIT_ONLY_FOR_MANUAL_EXITS or exit_type == "manual_or_liquidation":
-                        await self.send_profit_message(profit_data)
-                    else:
-                        logger.info(f"Not sending profit message for {exit_type} exit as per configuration")
+                    # Always send profit message for any exit type
+                    await self.send_profit_message(profit_data)
+                    logger.info(f"Sent profit message for {exit_type} exit")
                     
                 except Exception as e:
                     logger.error(f"Error processing profit result: {e}")
                     
-            # As a final safety check, cancel any remaining orders
+            # Final cleanup
             try:
                 await self.cancel_all_open_orders(symbol)
             except Exception as e:
@@ -847,10 +854,12 @@ class BinanceTrader:
                 
         except Exception as e:
             logger.error(f"Error in order execution monitor for {symbol}: {e}")
+
     def setup_order_monitor(self, symbol: str, entry_order_id: int, sl_order_id: int, tp_order_id: int,
-                            entry_price: float, position_size: float, position_type: str, leverage: int):
+                        entry_price: float, position_size: float, position_type: str, leverage: int):
         """
         Set up monitoring for order execution to clean up related orders and send profit messages.
+        Uses asyncio.create_task to run monitoring in the background.
         
         Args:
             symbol (str): The trading symbol
@@ -863,11 +872,84 @@ class BinanceTrader:
             leverage (int): Leverage used
         """
         # Start the monitor in a separate task to avoid blocking
-        asyncio.create_task(self.monitor_order_execution(
+        task = asyncio.create_task(self.monitor_order_execution(
             symbol, entry_order_id, sl_order_id, tp_order_id, 
             entry_price, position_size, position_type, leverage
         ))
-        logger.info(f"Set up order execution monitor for {symbol}")
+        
+        # Store the task reference for tracking
+        task_key = f"{symbol}_{entry_order_id}"
+        self._monitor_tasks[task_key] = task
+        
+        logger.info(f"Set up order execution monitor for {symbol} in background task")
+
+    async def load_and_monitor_active_positions(self):
+        """
+        Load all active positions from Binance and set up monitoring for them.
+        This should be called when the bot starts to ensure all open positions are tracked.
+        """
+        try:
+            logger.info("Loading active positions from Binance...")
+            
+            # Get all open positions
+            positions = self.client.futures_position_information()
+            active_positions = [p for p in positions if float(p['positionAmt']) != 0]
+            
+            if not active_positions:
+                logger.info("No active positions found on Binance")
+                return
+            
+            logger.info(f"Found {len(active_positions)} active positions")
+            
+            # For each active position, find associated orders and set up monitoring
+            for position in active_positions:
+                symbol = position['symbol']
+                position_amt = float(position['positionAmt'])
+                position_type = "LONG" if position_amt > 0 else "SHORT"
+                entry_price = float(position['entryPrice'])
+                leverage = min(self.get_max_leverage(symbol), int(Config.MAX_LEVERAGE))
+                
+                # Get open orders for this symbol
+                try:
+                    open_orders = self.client.futures_get_open_orders(symbol=symbol)
+                    
+                    # Find stop loss and take profit orders
+                    sl_order = next((o for o in open_orders if o['type'] in ['STOP_MARKET', 'STOP'] 
+                                    and ((position_amt > 0 and o['side'] == 'SELL') 
+                                        or (position_amt < 0 and o['side'] == 'BUY'))), None)
+                    
+                    tp_order = next((o for o in open_orders if o['type'] in ['TAKE_PROFIT_MARKET', 'TAKE_PROFIT'] 
+                                    and ((position_amt > 0 and o['side'] == 'SELL') 
+                                        or (position_amt < 0 and o['side'] == 'BUY'))), None)
+                    
+                    # If we have both SL and TP orders, set up monitoring
+                    if sl_order and tp_order:
+                        logger.info(f"Setting up monitoring for existing position: {symbol} {position_type}")
+                        
+                        # Use a dummy entry order ID (we don't need it since position is already filled)
+                        dummy_entry_id = int(time.time() * 1000)  # Use current timestamp as dummy ID
+                        
+                        # Set up monitoring with the found orders
+                        self.setup_order_monitor(
+                            symbol=symbol,
+                            entry_order_id=dummy_entry_id,
+                            sl_order_id=sl_order['orderId'],
+                            tp_order_id=tp_order['orderId'],
+                            entry_price=entry_price,
+                            position_size=abs(position_amt),
+                            position_type=position_type,
+                            leverage=leverage
+                        )
+                        
+                    else:
+                        # If we don't have both SL and TP orders, log but don't monitor
+                        logger.warning(f"Found position for {symbol} but not all required orders (SL: {bool(sl_order)}, TP: {bool(tp_order)})")
+                        
+                except Exception as e:
+                    logger.error(f"Error processing position for {symbol}: {e}")
+                    
+        except Exception as e:
+            logger.error(f"Error loading active positions: {e}")
 
     async def set_leverage_for_symbol(self, symbol: str, leverage: int) -> bool:
         """
@@ -1055,41 +1137,3 @@ class BinanceTrader:
             
             results['errors'].append(error_msg)
             return results
-
-    def parse(self, message: str):
-        try:
-            # Split message into lines and remove empty lines
-            lines = [line.strip() for line in message.split('\n') if line.strip()]
-
-            # First line should contain trading pair and position type
-            first_line = lines[0]
-
-            # Look for trading pair (any word containing /)
-            symbol = next((word for word in first_line.split() if '/' in word), None)
-            symbol = "".join(re.findall(r"[A-Z0-9]+", symbol))  # Keep numbers and uppercase letters
-            if not symbol:
-                return None
-
-            # Position type
-            position_type = 'LONG' if 'Long' in first_line else 'SHORT' if 'Short' in first_line else None
-            if not position_type:
-                return None
-
-            # Rest of your parsing logic for entry price, stop loss, take profits...
-            # ...
-
-            # Convert symbol format from X/Y to XY for Binance
-            binance_symbol = symbol.replace('/', '')
-
-            return {
-                'symbol': symbol,
-                'binance_symbol': binance_symbol,
-                'position_type': position_type,
-                'entry_price': entry_price,
-                'stop_loss': stop_loss,
-                'take_profit_levels': tp_levels,
-                'original_message': message
-            }
-        except Exception as e:
-            logger.error(f"Error parsing message: {e}")
-            return None
