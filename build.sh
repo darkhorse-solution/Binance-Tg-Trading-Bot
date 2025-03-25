@@ -223,8 +223,11 @@ DEFAULT_SL_PERCENT=100.0
 LOG_LEVEL=INFO
 LOG_FILE=logs/trading_bot.log
 
+# Trading amount settings
+TRADING_MODE=ratio   # Options: "ratio" or "fixed"
+WALLET_RATIO=10      # Used when TRADING_MODE=ratio (percentage of wallet)
+CONSTANT_AMOUNT=100.0  # Used when TRADING_MODE=fixed (amount in QUOTE_ASSET)
 QUOTE_ASSET=USDT
-WALLET_RATIO=10
 
 # Profit reporting
 ENABLE_PROFIT_REPORTING=true

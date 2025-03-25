@@ -139,6 +139,8 @@ The bot is configured through environment variables in the `.env` file:
 - `DEFAULT_RISK_PERCENT`: Percentage of account to risk per trade (default: 2.0)
 - `MAX_LEVERAGE`: Maximum leverage to use (default: 20)
 
+# Trading Settings Section Update (for README.md)
+
 ### Trading Settings
 
 - `ENABLE_AUTO_SL`: Enable automatic stop loss if not provided in signal (default: true)
@@ -146,8 +148,36 @@ The bot is configured through environment variables in the `.env` file:
 - `DEFAULT_TP_PERCENT`: Default take profit percentage (default: 20.0)
 - `DEFAULT_SL_PERCENT`: Default stop loss percentage (default: 100.0)
 - `QUOTE_ASSET`: Quote asset for trading (default: USDT)
-- `WALLET_RATIO`: Wallet allocation ratio (default: 10)
 
+### Trading Amount Settings
+
+The bot supports two trading modes:
+
+- `TRADING_MODE`: Determines how trade amounts are calculated (options: "ratio" or "fixed", default: "ratio")
+  - `ratio`: Calculate trade amount as a percentage of your wallet balance
+  - `fixed`: Use a fixed amount for every trade
+
+Depending on the mode selected, the following settings apply:
+
+- When using `ratio` mode:
+  - `WALLET_RATIO`: Percentage of wallet balance to use per trade (default: 10)
+  
+- When using `fixed` mode:
+  - `CONSTANT_AMOUNT`: Fixed amount of USDT to use for each trade (default: 100.0)
+
+Example configurations:
+
+```
+# Use 5% of wallet balance per trade
+TRADING_MODE=ratio
+WALLET_RATIO=5
+
+# OR
+
+# Use 150 USDT for every trade
+TRADING_MODE=fixed
+CONSTANT_AMOUNT=150.0
+```
 ### Position Management
 
 - `CLOSE_POSITIONS_AFTER_TRADE`: Whether to close positions after trade (default: true)

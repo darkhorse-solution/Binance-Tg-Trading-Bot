@@ -17,15 +17,6 @@ class TradingBot:
     def __init__(self):
         """
         Initialize the trading bot with all required components.
-
-        Args:
-            api_id (int): Telegram API ID
-            api_hash (str): Telegram API hash
-            session_string (str): Telegram session string for authentication
-            binance_api_key (str): Binance API key
-            binance_api_secret (str): Binance API secret
-            source_channel_id (int): Channel ID to listen for signals
-            target_channel_id (int): Channel ID to forward processed signals
         """
         self.api_id = Config.API_ID
         self.api_hash = Config.API_HASH
@@ -35,12 +26,16 @@ class TradingBot:
 
         # Initialize components
         self.client = None
-        self.trader = BinanceTrader(Config.BINANCE_API_KEY, Config.BINANCE_API_SECRET_KEY, target_channel_id=self.target_channel_id if Config.ENABLE_FAILURE_NOTIFICATIONS else None)
+        self.trader = BinanceTrader(
+            Config.BINANCE_API_KEY, 
+            Config.BINANCE_API_SECRET_KEY, 
+            target_channel_id=self.target_channel_id if Config.ENABLE_FAILURE_NOTIFICATIONS else None
+        )
         self.parser = SignalParser()
         self.formatter = SignalFormatter()
 
     async def start(self):
-        """Start the Telegram client and set up handlers."""
+        """Start the Telegram client, set up handlers, and load active positions."""
         logger.info('Initializing Telegram client...')
 
         # Create and connect to Telegram
@@ -61,6 +56,11 @@ class TradingBot:
         self.trader.target_channel_id = self.target_channel_id  # Explicitly set target channel
         
         self._setup_handlers()
+        
+        # Load and monitor active positions from Binance
+        logger.info('Loading active positions from Binance...')
+        await self.trader.load_and_monitor_active_positions()
+        
         logger.info('Bot started successfully')
 
     async def run(self):
