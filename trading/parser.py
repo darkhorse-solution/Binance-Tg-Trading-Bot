@@ -16,6 +16,7 @@ def parse_trading_signal(message: str):
         dict: Parsed signal data or None if parsing failed
     """
     try:
+        print(f"Parsing message: {message}")
         # Split message into lines and remove empty lines
         lines = [line.strip() for line in message.split('\n') if line.strip()]
 
