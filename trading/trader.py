@@ -1,6 +1,8 @@
 import math
 import asyncio
 import time
+import json
+import os
 from datetime import datetime, timedelta
 from binance.client import Client
 from utils.logger import logger, trading_failures_logger, profit_logger
@@ -1011,17 +1013,45 @@ class BinanceTrader:
             max_leverage = min(self.get_max_leverage(symbol), int(Config.MAX_LEVERAGE))
             
             if max_leverage == 0:
-                # Symbol is not supported
-                await self.handle_trading_failure(
-                    symbol, 
-                    "Symbol not supported on Binance Futures", 
-                    Exception("Unsupported symbol"), 
-                    original_message
-                )
-                results['errors'].append(f"Symbol {symbol} not supported on Binance Futures")
-                return results
+                # Symbol is not supported, check if we have a mapping
+                mapped_symbol = None
+                try:
+                    # Read the mapping file only when needed
+                    if os.path.exists("symbol_mappings.json"):
+                        with open("symbol_mappings.json", "r") as f:
+                            mappings = json.load(f)
+                        
+                        # Check for exact match
+                        if symbol in mappings:
+                            mapped_symbol = mappings[symbol]
+                        # Check for case-insensitive match
+                        else:
+                            for key, value in mappings.items():
+                                if key.lower() == symbol.lower():
+                                    mapped_symbol = value
+                                    break
+                    
+                    # If we found a mapping, try again with the mapped symbol
+                    if mapped_symbol:
+                        logger.info(f"Using mapped symbol: {symbol} -> {mapped_symbol}")
+                        symbol = mapped_symbol
+                        max_leverage = min(self.get_max_leverage(symbol), int(Config.MAX_LEVERAGE))
+                        results['mapped_symbol'] = mapped_symbol
+                except Exception as e:
+                    logger.error(f"Error checking symbol mapping: {e}")
                 
-            # NEW STEP: Set the leverage on Binance
+                # If still not supported after mapping
+                if max_leverage == 0:
+                    await self.handle_trading_failure(
+                        symbol, 
+                        "Symbol not supported on Binance Futures", 
+                        Exception("Unsupported symbol"), 
+                        original_message
+                    )
+                    results['errors'].append(f"Symbol {symbol} not supported on Binance Futures")
+                    return results
+            
+            # Step 2: Set the leverage on Binance
             leverage_set = await self.set_leverage_for_symbol(symbol, max_leverage)
             if not leverage_set:
                 await self.handle_trading_failure(
@@ -1033,7 +1063,7 @@ class BinanceTrader:
                 results['errors'].append(f"Failed to set leverage to {max_leverage}x for {symbol}")
                 return results
             
-            # Step 2: Calculate position size using risk management
+            # Step 3: Calculate position size using risk management
             try:
                 position_size, _ = self.calculate_coin_amount_to_buy(
                     symbol, max_leverage
@@ -1049,7 +1079,7 @@ class BinanceTrader:
                 results['errors'].append(f"Position sizing error: {str(e)}")
                 return results
 
-            # Step 3: Create the main entry order
+            # Step 4: Create the main entry order
             side = "BUY" if position_type == 'LONG' else "SELL"
             try:
                 entry_order = await self._create_entry_order(symbol, side, position_size, entry_price)
@@ -1068,7 +1098,7 @@ class BinanceTrader:
                 results['errors'].append(f"Entry order error: {str(e)}")
                 return results
 
-            # Step 4: Create take profit and stop loss orders
+            # Step 5: Create take profit and stop loss orders
             try:
                 tp_result = await self._create_take_profit_order(
                     symbol, side, position_size, max_leverage, entry_price, Config.DEFAULT_TP_PERCENT
@@ -1101,7 +1131,7 @@ class BinanceTrader:
                 results['warnings'].append(f"Created entry order, but failed to set TP/SL: {str(e)}")
                 # We still return success since the main order was placed
 
-            # Step 5: Set up order monitoring to clean up orders when SL or TP is triggered
+            # Step 6: Set up order monitoring to clean up orders when SL or TP is triggered
             if (results['entry_order'] and 'orderId' in results['entry_order'] and
                 results['stop_loss_order'] and 'orderId' in results['stop_loss_order'] and
                 results['take_profit_orders'] and 'orderId' in results['take_profit_orders'][0]):
@@ -1137,3 +1167,179 @@ class BinanceTrader:
             
             results['errors'].append(error_msg)
             return results
+        
+    async def adjust_stop_loss_for_profit_target(self, symbol: str, profit_target: float) -> dict:
+        """
+        Adjust the stop loss order for an open position based on current price,
+        using the default SL percentage as if creating a new order.
+        
+        Args:
+            symbol (str): The trading symbol
+            profit_target (float): Not used directly, just triggers the adjustment
+            
+        Returns:
+            dict: Result with status, message, and SL details
+        """
+        result = {
+            'success': False,
+            'message': '',
+            'original_sl_price': None,
+            'new_sl_price': None
+        }
+        
+        try:
+            # Get current position information
+            position_info = self.client.futures_position_information(symbol=symbol)
+            
+            # Find the position for this symbol with non-zero amount
+            position = next((p for p in position_info if p['symbol'] == symbol and float(p['positionAmt']) != 0), None)
+            
+            if not position:
+                result['message'] = f"No open position found for {symbol}"
+                return result
+            
+            # Determine position details
+            position_amt = float(position['positionAmt'])
+            position_type = "LONG" if position_amt > 0 else "SHORT"
+            entry_price = float(position['entryPrice'])
+            
+            # Get the current market price
+            current_price = self.get_last_price(symbol)
+            if not current_price:
+                result['message'] = f"Could not get current price for {symbol}"
+                return result
+                
+            logger.info(f"Current market price for {symbol}: {current_price}")
+            
+            # Get open orders for this symbol
+            open_orders = self.client.futures_get_open_orders(symbol=symbol)
+            
+            # Find existing stop loss order
+            sl_order = next((o for o in open_orders if o['type'] in ['STOP_MARKET', 'STOP'] 
+                            and ((position_amt > 0 and o['side'] == 'SELL') 
+                                or (position_amt < 0 and o['side'] == 'BUY'))), None)
+            
+            if not sl_order:
+                result['message'] = f"No stop loss order found for {symbol}"
+                return result
+            
+            # Get the current SL price
+            current_sl_price = float(sl_order['stopPrice'])
+            logger.info(f"Current SL price for {symbol}: {current_sl_price}")
+            
+            # Get leverage - for calculating SL distances
+            try:
+                # Try first from position info
+                if 'leverage' in position:
+                    leverage = int(position['leverage'])
+                else:
+                    # Fallback to the cached leverage
+                    leverage = self.get_max_leverage(symbol)
+                    
+                # Cap at max leverage
+                leverage = min(leverage, int(Config.MAX_LEVERAGE))
+                logger.info(f"Using leverage: {leverage}x")
+            except Exception as e:
+                logger.error(f"Error getting leverage, using default: {e}")
+                leverage = int(Config.MAX_LEVERAGE)
+                
+            # Get the default SL percentage from config
+            default_sl_percent = float(Config.DEFAULT_SL_PERCENT)
+            logger.info(f"Using default SL percent: {default_sl_percent}%")
+            
+            # Calculate new SL price based on current price and default SL percentage
+            if position_type == "LONG":
+                # For LONG positions, SL is below current price
+                new_sl_price = current_price * (1 - (default_sl_percent / (100 * leverage)))
+            else:  # SHORT
+                # For SHORT positions, SL is above current price
+                new_sl_price = current_price * (1 + (default_sl_percent / (100 * leverage)))
+            
+            # Get price precision for formatting
+            price_precision = self.get_price_precision(symbol)
+            new_sl_price = round(new_sl_price, price_precision)
+            
+            logger.info(f"Calculated new SL price for {symbol}: {new_sl_price}")
+            
+            # Check if the new SL is an improvement
+            is_better_sl = False
+            if position_type == "LONG" and new_sl_price > current_sl_price:
+                is_better_sl = True
+            elif position_type == "SHORT" and new_sl_price < current_sl_price:
+                is_better_sl = True
+                
+            if not is_better_sl:
+                result['message'] = f"Current SL is already better than calculated new SL. No adjustment needed."
+                result['success'] = True  # Still mark as success since no action was required
+                return result
+            
+            # Cancel existing SL order
+            try:
+                self.client.futures_cancel_order(
+                    symbol=symbol,
+                    orderId=sl_order['orderId']
+                )
+                logger.info(f"Canceled existing SL order {sl_order['orderId']} for {symbol}")
+            except Exception as e:
+                logger.error(f"Error canceling existing SL order: {e}")
+                result['message'] = f"Failed to cancel existing SL order: {str(e)}"
+                return result
+            
+            # Create new SL order
+            try:
+                new_sl_order = self.client.futures_create_order(
+                    symbol=symbol,
+                    side='SELL' if position_type == 'LONG' else 'BUY',
+                    type="STOP_MARKET",
+                    stopPrice=new_sl_price,
+                    closePosition=True  # Close the entire position
+                )
+                
+                logger.info(f"Created new SL order for {symbol} at {new_sl_price}: {new_sl_order['orderId']}")
+                
+                # Calculate raw price movements for reporting
+                if position_type == "LONG":
+                    old_raw_percent = ((current_sl_price - entry_price) / entry_price) * 100
+                    new_raw_percent = ((new_sl_price - entry_price) / entry_price) * 100
+                    old_leveraged = old_raw_percent * leverage
+                    new_leveraged = new_raw_percent * leverage
+                else:  # SHORT
+                    old_raw_percent = ((entry_price - current_sl_price) / entry_price) * 100
+                    new_raw_percent = ((entry_price - new_sl_price) / entry_price) * 100
+                    old_leveraged = old_raw_percent * leverage
+                    new_leveraged = new_raw_percent * leverage
+                
+                result['success'] = True
+                result['message'] = f"Successfully adjusted SL from {current_sl_price} to {new_sl_price}"
+                result['original_sl_price'] = current_sl_price
+                result['new_sl_price'] = new_sl_price
+                result['new_sl_order'] = new_sl_order
+                
+                # Send notification about SL adjustment
+                if self.telegram_client and self.target_channel_id:
+                    notification = (
+                        f"🔄 STOP LOSS ADJUSTED\n\n"
+                        f"Pair: {symbol}\n"
+                        f"Position: {'🟢 LONG' if position_type == 'LONG' else '🔴 SHORT'}\n"
+                        f"Leverage: {leverage}x\n"
+                        f"Entry Price: {entry_price}\n"
+                        f"Current Price: {current_price}\n"
+                        f"Original SL: {current_sl_price} ({old_leveraged:.2f}%)\n"
+                        f"New SL: {new_sl_price} ({new_leveraged:.2f}%)\n"
+                        f"Default SL Distance: {default_sl_percent}%\n\n"
+                        f"#Binance #{symbol}"
+                    )
+                    
+                    await self.telegram_client.send_message(self.target_channel_id, notification)
+                
+                return result
+                
+            except Exception as e:
+                logger.error(f"Error creating new SL order: {e}")
+                result['message'] = f"Failed to create new SL order: {str(e)}"
+                return result
+                
+        except Exception as e:
+            logger.error(f"Error adjusting stop loss for {symbol}: {e}")
+            result['message'] = f"Error: {str(e)}"
+            return result

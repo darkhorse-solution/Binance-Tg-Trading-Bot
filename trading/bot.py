@@ -1,4 +1,5 @@
-# trading/bot.py
+import os
+import json
 import asyncio
 from telethon import TelegramClient, events
 from telethon.sessions import StringSession
@@ -111,19 +112,102 @@ class TradingBot:
                 # Format the signal for readability
                 formatted_message = self.formatter.format(signal)
 
-                # Execute trading orders
-                await self._execute_trades(signal)
+                # Check if this is a profit message (not a trading signal)
+                if signal.get('is_profit_message', False):
+                    # For profit messages, we handle profit taking or SL adjustment
+                    await self._handle_profit_message(signal, formatted_message)
+                else:
+                    # For trading signals, execute trades
+                    await self._execute_trades(signal)
 
-                # Send formatted message to target channel if not empty and entry notifications are disabled
-                # This prevents duplicate messages when entry notifications are enabled
-                if formatted_message and not Config.ENABLE_ENTRY_NOTIFICATIONS:
-                    try:
-                        await self.client.send_message(self.target_channel_id, formatted_message)
-                        logger.info("Signal processed and forwarded successfully!")
-                    except Exception as e:
-                        logger.error(f"Error sending message: {e}")
+                    # Send formatted message to target channel if not empty and entry notifications are disabled
+                    # This prevents duplicate messages when entry notifications are enabled
+                    if formatted_message and not Config.ENABLE_ENTRY_NOTIFICATIONS:
+                        try:
+                            await self.client.send_message(self.target_channel_id, formatted_message)
+                            logger.info("Signal processed and forwarded successfully!")
+                        except Exception as e:
+                            logger.error(f"Error sending message: {e}")
             else:
-                logger.info("Message received but not a valid trading signal")
+                logger.info("Message received but not a valid signal")
+
+    async def _handle_profit_message(self, signal, formatted_message):
+        """
+        Handle profit message signals - check symbol mapping, manage orders, and forward.
+        
+        Args:
+            signal (dict): Parsed profit message signal
+            formatted_message (str): Formatted message to forward
+        """
+        # Check if the symbol needs mapping
+        symbol = signal['binance_symbol']
+        mapped_symbol = None
+        
+        try:
+            # Read mapping file
+            if os.path.exists("symbol_mappings.json"):
+                with open("symbol_mappings.json", "r") as f:
+                    mappings = json.load(f)
+                
+                # Check for exact match
+                if symbol in mappings:
+                    mapped_symbol = mappings[symbol]
+                # Check for case-insensitive match
+                else:
+                    for key, value in mappings.items():
+                        if key.lower() == symbol.lower():
+                            mapped_symbol = value
+                            break
+            
+            # If we found a mapping, update the symbol
+            if mapped_symbol:
+                logger.info(f"Using mapped symbol for profit message: {symbol} -> {mapped_symbol}")
+                symbol = mapped_symbol
+                # Update the formatted message with mapped symbol
+                formatted_message = formatted_message.replace(f"#{signal['binance_symbol']}", f"#{mapped_symbol}")
+        except Exception as e:
+            logger.error(f"Error checking symbol mapping for profit message: {e}")
+        
+        # Handle the profit message based on profit target percentage
+        profit_target = signal.get('profit_target', 0)
+        
+        # If 100% profit target, fully exit the position
+        if profit_target == 100:
+            try:
+                logger.info(f"Attempting to close position for {symbol} as 100% profit target reached")
+                result = await self.trader.close_position(symbol)
+                
+                if result['success']:
+                    logger.info(f"Successfully closed position for {symbol}: {result['message']}")
+                    # Add to formatted message
+                    formatted_message += f"\n\n✅ Position closed at 100% profit target"
+                else:
+                    logger.warning(f"Failed to close position for {symbol}: {result['message']}")
+            except Exception as e:
+                logger.error(f"Error closing position for {symbol}: {e}")
+        
+        # For other profit targets, adjust the stop loss
+        elif profit_target > 0:
+            try:
+                logger.info(f"Attempting to adjust SL for {symbol} to lock in {profit_target}% profit")
+                result = await self.trader.adjust_stop_loss_for_profit_target(symbol, profit_target)
+                
+                if result['success']:
+                    logger.info(f"Successfully adjusted SL for {symbol}: {result['message']}")
+                    # Add to formatted message
+                    if result.get('original_sl_percent') and result.get('new_sl_percent'):
+                        formatted_message += f"\n\n✅ Stop Loss adjusted from {result['original_sl_percent']}% to {result['new_sl_percent']}% to lock in profits"
+                else:
+                    logger.warning(f"Failed to adjust SL for {symbol}: {result['message']}")
+            except Exception as e:
+                logger.error(f"Error adjusting SL for {symbol}: {e}")
+        
+        # Forward the profit message to the target channel
+        try:
+            await self.client.send_message(self.target_channel_id, formatted_message)
+            logger.info("Profit message forwarded successfully!")
+        except Exception as e:
+            logger.error(f"Error sending profit message: {e}")
 
     async def _execute_trades(self, signal):
         """
