@@ -1,5 +1,14 @@
 {
-    "BEAMUSDT": "BEAMXUSDT",
-    "BROCCOLIUSDT": "BROCCOLI714USDT",
-    "1000TURBOUSDT": "TURBOUSDT"
+    "BEAMUSDT": {
+        "symbol": "BEAMXUSDT",
+        "rate": 1.0
+    },
+    "BROCCOLIUSDT": {
+        "symbol": "BROCCOLI714USDT",
+        "rate": 1.0
+    },
+    "1000TURBOUSDT": {
+        "symbol": "TURBOUSDT",
+        "rate": 0.001
+    }
 }

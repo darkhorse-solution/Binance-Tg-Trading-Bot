@@ -9,6 +9,7 @@ from utils.logger import logger, trading_failures_logger, profit_logger
 from typing import Dict, List, Optional, Any, Tuple
 from trading.risk import RiskManager
 from utils.config import Config
+from trading.symbol_mapper import SymbolMapper
 import re
 
 
@@ -35,6 +36,9 @@ class BinanceTrader:
         # Initialize risk manager
         self.risk_manager = RiskManager(default_risk_percent, max_leverage)
 
+        # Initialize symbol mapper with rate adjustment support
+        self.symbol_mapper = SymbolMapper()
+
         # Caches for API data
         self._symbol_info_cache = {}
         self._leverage_cache = {}
@@ -48,6 +52,9 @@ class BinanceTrader:
 
         # Dictionary to track ongoing monitoring tasks
         self._monitor_tasks = {}
+
+        # Trading state tracking (for symbol mapping)
+        self._active_trades = {}  # To track original symbol, mapped symbol, and rate
 
         # Initialize caches with common symbols at startup
         self._prefetch_common_symbols()
@@ -625,18 +632,23 @@ class BinanceTrader:
             else:
                 exit_description = "UNKNOWN"
                 
+            # Use display values if available
+            display_symbol = profit_data.get('display_symbol', profit_data['symbol'])
+            entry_price = profit_data.get('display_entry_price', profit_data['entry_price'])
+            exit_price = profit_data.get('display_exit_price', profit_data['exit_price'])
+                
             # Format the message
             message = (
                 f"{emoji} TRADE {result_type} - {exit_description}\n\n"
-                f"Pair: {profit_data['symbol']}\n"
+                f"Pair: {display_symbol}\n"
                 f"Position: {profit_data['position_type']}\n"
                 f"Leverage: {profit_data['leverage']}x\n"
-                f"Entry: {profit_data['entry_price']:.4f}\n"
-                f"Exit: {profit_data['exit_price']:.4f}\n"
+                f"Entry: {entry_price:.4f}\n"
+                f"Exit: {exit_price:.4f}\n"
                 f"Size: {profit_data['position_size']:.4f}\n\n"
                 f"P/L: {profit_data['absolute_profit']:.4f} USDT ({profit_data['leveraged_percentage']:.2f}%)\n"
                 f"Raw Price Change: {profit_data['price_diff_percent']:.2f}%\n\n"
-                f"#trade #{profit_data['symbol']} #{profit_data['position_type'].lower()} #{exit_type}"
+                f"#trade #{display_symbol} #{profit_data['position_type'].lower()} #{exit_type}"
             )
             
             # Send the message
@@ -644,17 +656,18 @@ class BinanceTrader:
             
             # Also log to the profit logger
             profit_logger.info(
-                f"{profit_data['symbol']} {profit_data['position_type']} - {exit_description} - " +
+                f"{display_symbol} {profit_data['position_type']} - {exit_description} - " +
                 f"P/L: {profit_data['absolute_profit']:.4f} USDT ({profit_data['leveraged_percentage']:.2f}%)"
             )
             
-            logger.info(f"Sent profit result message for {profit_data['symbol']}")
+            logger.info(f"Sent profit result message for {display_symbol}")
             
         except Exception as e:
             logger.error(f"Error sending profit message: {e}")
 
     async def monitor_order_execution(self, symbol: str, entry_order_id: int, sl_order_id: int, tp_order_id: int, 
-                             entry_price: float, position_size: float, position_type: str, leverage: int):
+                             entry_price: float, position_size: float, position_type: str, leverage: int,
+                             original_symbol: str = None, rate_multiplier: float = 1.0):
         """
         Monitor order execution and clean up related orders when one gets triggered.
         Also sends profit result messages when the trade is completed.
@@ -668,7 +681,12 @@ class BinanceTrader:
             position_size (float): Position size
             position_type (str): 'LONG' or 'SHORT'
             leverage (int): Leverage used
+            original_symbol (str, optional): Original symbol from signal
+            rate_multiplier (float, optional): Rate multiplier used for price adjustment
         """
+        # Use original symbol for display if provided, otherwise use actual symbol
+        display_symbol = original_symbol if original_symbol else symbol
+        
         try:
             # For positions that already exist, we don't need to check entry order
             check_entry = entry_order_id < 1000000000000  # If it's a real order ID, not our dummy timestamp
@@ -832,13 +850,26 @@ class BinanceTrader:
                     
                     profit_data['exit_type'] = exit_type
                     
+                    # For display, convert prices back to original if needed
+                    if rate_multiplier != 1.0 and rate_multiplier > 0:
+                        display_entry_price = entry_price / rate_multiplier
+                        display_exit_price = exit_price / rate_multiplier
+                        
+                        # Update display prices but keep actual profit calculation
+                        profit_data['display_symbol'] = display_symbol
+                        profit_data['display_entry_price'] = display_entry_price
+                        profit_data['display_exit_price'] = display_exit_price
+                    else:
+                        profit_data['display_symbol'] = display_symbol
+                        profit_data['display_entry_price'] = entry_price
+                        profit_data['display_exit_price'] = exit_price
+                    
                     # Log profit details
                     profit_message = (
-                        f"{symbol} {position_type} - {exit_type.upper()} - " +
-                        f"Entry: {entry_price:.4f}, Exit: {exit_price:.4f}, " +
+                        f"{display_symbol} {position_type} - {exit_type.upper()} - " +
+                        f"Entry: {profit_data['display_entry_price']:.4f}, Exit: {profit_data['display_exit_price']:.4f}, " +
                         f"P/L: {profit_data['absolute_profit']:.4f} USDT ({profit_data['leveraged_percentage']:.2f}%)"
                     )
-                    from utils.logger import profit_logger
                     profit_logger.info(profit_message)
                     
                     # Always send profit message for any exit type
@@ -858,25 +889,28 @@ class BinanceTrader:
             logger.error(f"Error in order execution monitor for {symbol}: {e}")
 
     def setup_order_monitor(self, symbol: str, entry_order_id: int, sl_order_id: int, tp_order_id: int,
-                        entry_price: float, position_size: float, position_type: str, leverage: int):
+                        entry_price: float, position_size: float, position_type: str, leverage: int,
+                        original_symbol: str = None, rate_multiplier: float = 1.0):
         """
-        Set up monitoring for order execution to clean up related orders and send profit messages.
-        Uses asyncio.create_task to run monitoring in the background.
+        Set up monitoring for order execution with support for symbol mapping and rate adjustment.
         
         Args:
-            symbol (str): The trading symbol
+            symbol (str): The actual trading symbol used
             entry_order_id (int): Entry order ID
             sl_order_id (int): Stop loss order ID
             tp_order_id (int): Take profit order ID
-            entry_price (float): Entry price
+            entry_price (float): Entry price (adjusted if using mapped symbol)
             position_size (float): Position size
             position_type (str): 'LONG' or 'SHORT'
             leverage (int): Leverage used
+            original_symbol (str, optional): Original symbol from signal
+            rate_multiplier (float, optional): Rate multiplier used for price adjustment
         """
         # Start the monitor in a separate task to avoid blocking
         task = asyncio.create_task(self.monitor_order_execution(
             symbol, entry_order_id, sl_order_id, tp_order_id, 
-            entry_price, position_size, position_type, leverage
+            entry_price, position_size, position_type, leverage,
+            original_symbol, rate_multiplier
         ))
         
         # Store the task reference for tracking
@@ -991,15 +1025,15 @@ class BinanceTrader:
         Returns:
             dict: Trade execution results
         """
-        symbol = signal['binance_symbol']
+        original_symbol = signal['binance_symbol']
         position_type = signal['position_type']
-        entry_price = signal['entry_price']
-        stop_loss = signal.get('stop_loss')
-        take_profit_levels = signal['take_profit_levels']
+        original_entry_price = signal['entry_price']
+        original_stop_loss = signal.get('stop_loss')
+        original_take_profit_levels = signal['take_profit_levels']
         original_message = signal.get('original_message', 'Unknown message')
 
         results = {
-            'symbol': symbol,
+            'original_symbol': original_symbol,
             'position': position_type,
             'entry_order': None,
             'stop_loss_order': None,
@@ -1009,59 +1043,74 @@ class BinanceTrader:
         }
 
         try:
-            # Step 1: Check the maximum supported leverage
-            max_leverage = min(self.get_max_leverage(symbol), int(Config.MAX_LEVERAGE))
+            # Step 1: Check the maximum supported leverage and apply symbol mapping if needed
+            max_leverage = min(self.get_max_leverage(original_symbol), int(Config.MAX_LEVERAGE))
+            
+            # Initialize variables for potential mapping
+            symbol = original_symbol
+            entry_price = original_entry_price
+            stop_loss = original_stop_loss
+            take_profit_levels = original_take_profit_levels.copy() if original_take_profit_levels else []
+            rate_multiplier = 1.0
             
             if max_leverage == 0:
                 # Symbol is not supported, check if we have a mapping
-                mapped_symbol = None
-                try:
-                    # Read the mapping file only when needed
-                    if os.path.exists("symbol_mappings.json"):
-                        with open("symbol_mappings.json", "r") as f:
-                            mappings = json.load(f)
-                        
-                        # Check for exact match
-                        if symbol in mappings:
-                            mapped_symbol = mappings[symbol]
-                        # Check for case-insensitive match
-                        else:
-                            for key, value in mappings.items():
-                                if key.lower() == symbol.lower():
-                                    mapped_symbol = value
-                                    break
+                mapped_symbol, rate = self.symbol_mapper.get_mapped_symbol(original_symbol)
+                
+                if mapped_symbol:
+                    logger.info(f"Using mapped symbol with rate adjustment: {original_symbol} -> {mapped_symbol} (rate: {rate})")
+                    symbol = mapped_symbol
+                    rate_multiplier = rate
                     
-                    # If we found a mapping, try again with the mapped symbol
-                    if mapped_symbol:
-                        logger.info(f"Using mapped symbol: {symbol} -> {mapped_symbol}")
-                        symbol = mapped_symbol
-                        max_leverage = min(self.get_max_leverage(symbol), int(Config.MAX_LEVERAGE))
-                        results['mapped_symbol'] = mapped_symbol
-                except Exception as e:
-                    logger.error(f"Error checking symbol mapping: {e}")
+                    # Adjust prices according to the rate
+                    entry_price = original_entry_price * rate
+                    
+                    if original_stop_loss:
+                        stop_loss = original_stop_loss * rate
+                    
+                    # Adjust all take profit levels
+                    for i, tp in enumerate(take_profit_levels):
+                        tp['price'] = tp['price'] * rate
+                    
+                    # Try again with the mapped symbol
+                    max_leverage = min(self.get_max_leverage(symbol), int(Config.MAX_LEVERAGE))
+                    results['mapped_symbol'] = mapped_symbol
+                    results['rate_multiplier'] = rate
+                    
+                    # Store the mapping for future reference (needed for profit calculation)
+                    self._active_trades[symbol] = {
+                        'original_symbol': original_symbol,
+                        'rate': rate
+                    }
                 
                 # If still not supported after mapping
                 if max_leverage == 0:
                     await self.handle_trading_failure(
-                        symbol, 
+                        original_symbol, 
                         "Symbol not supported on Binance Futures", 
                         Exception("Unsupported symbol"), 
                         original_message
                     )
-                    results['errors'].append(f"Symbol {symbol} not supported on Binance Futures")
+                    results['errors'].append(f"Symbol {original_symbol} not supported on Binance Futures")
                     return results
             
             # Step 2: Set the leverage on Binance
             leverage_set = await self.set_leverage_for_symbol(symbol, max_leverage)
             if not leverage_set:
                 await self.handle_trading_failure(
-                    symbol, 
+                    original_symbol, 
                     "Failed to set leverage on Binance", 
                     Exception("Leverage setting failed"), 
                     original_message
                 )
                 results['errors'].append(f"Failed to set leverage to {max_leverage}x for {symbol}")
                 return results
+            
+            # Store adjusted values in results
+            results['symbol'] = symbol
+            results['entry_price'] = entry_price
+            results['stop_loss'] = stop_loss
+            results['take_profit_levels'] = take_profit_levels
             
             # Step 3: Calculate position size using risk management
             try:
@@ -1071,7 +1120,7 @@ class BinanceTrader:
                 results['position_size'] = position_size
             except Exception as e:
                 await self.handle_trading_failure(
-                    symbol, 
+                    original_symbol, 
                     "Failed to calculate position size", 
                     e, 
                     original_message
@@ -1090,7 +1139,7 @@ class BinanceTrader:
                     
             except Exception as e:
                 await self.handle_trading_failure(
-                    symbol, 
+                    original_symbol, 
                     "Failed to create entry order", 
                     e, 
                     original_message
@@ -1098,7 +1147,7 @@ class BinanceTrader:
                 results['errors'].append(f"Entry order error: {str(e)}")
                 return results
 
-            # Step 5: Create take profit and stop loss orders
+            # Step 5: Create take profit and stop loss orders with adjusted prices
             try:
                 tp_result = await self._create_take_profit_order(
                     symbol, side, position_size, max_leverage, entry_price, Config.DEFAULT_TP_PERCENT
@@ -1115,14 +1164,25 @@ class BinanceTrader:
                 tp_price = float(tp_result['stopPrice']) if 'stopPrice' in tp_result else 0
                 
                 # Send entry message with all details
+                # Note: For display, convert back to original prices if needed
+                display_entry_price = entry_price
+                display_sl_price = sl_price
+                display_tp_price = tp_price
+                
+                if rate_multiplier != 1.0:
+                    # Convert back to original prices for display
+                    display_entry_price = entry_price / rate_multiplier
+                    display_sl_price = sl_price / rate_multiplier
+                    display_tp_price = tp_price / rate_multiplier
+                
                 if Config.ENABLE_ENTRY_NOTIFICATIONS:
                     await self.send_entry_message(
-                        symbol=symbol,
+                        symbol=original_symbol,  # Use original symbol for display
                         position_type=position_type,
                         leverage=max_leverage,
-                        entry_price=entry_price,
-                        sl_price=sl_price,
-                        tp_price=tp_price,
+                        entry_price=display_entry_price,
+                        sl_price=display_sl_price,
+                        tp_price=display_tp_price,
                         position_size=position_size
                     )
                 
@@ -1144,22 +1204,21 @@ class BinanceTrader:
                     entry_price,
                     position_size,
                     position_type,
-                    max_leverage
+                    max_leverage,
+                    original_symbol=original_symbol,  # Pass original symbol for proper display
+                    rate_multiplier=rate_multiplier  # Pass rate for price adjustments
                 )
                 results['order_monitoring'] = True
-
-            # Note: We do NOT close existing positions here as per the request
-            # Positions will be managed by SL/TP orders and closed only when they hit
 
             return results
 
         except Exception as e:
-            error_msg = f"Error executing signal for {symbol}: {e}"
+            error_msg = f"Error executing signal for {original_symbol}: {e}"
             logger.error(error_msg)
             
             # Handle any unexpected errors
             await self.handle_trading_failure(
-                symbol, 
+                original_symbol, 
                 "Unexpected error during trade execution", 
                 e, 
                 original_message
@@ -1167,7 +1226,7 @@ class BinanceTrader:
             
             results['errors'].append(error_msg)
             return results
-        
+
     async def adjust_stop_loss_for_profit_target(self, symbol: str, profit_target: float) -> dict:
         """
         Adjust the stop loss order for an open position based on current price,
@@ -1188,6 +1247,15 @@ class BinanceTrader:
         }
         
         try:
+            # Check if this is a mapped symbol that needs rate adjustment
+            original_symbol = symbol
+            rate_multiplier = 1.0
+            
+            if symbol in self._active_trades:
+                trade_info = self._active_trades[symbol]
+                original_symbol = trade_info.get('original_symbol', symbol)
+                rate_multiplier = trade_info.get('rate', 1.0)
+                
             # Get current position information
             position_info = self.client.futures_position_information(symbol=symbol)
             
@@ -1314,20 +1382,33 @@ class BinanceTrader:
                 result['original_sl_price'] = current_sl_price
                 result['new_sl_price'] = new_sl_price
                 result['new_sl_order'] = new_sl_order
+                result['original_sl_percent'] = old_leveraged
+                result['new_sl_percent'] = new_leveraged
+                
+                # If successful and we need to display original prices
+                if rate_multiplier != 1.0:
+                    # Store both actual and display prices
+                    result['actual_original_sl_price'] = result['original_sl_price']
+                    result['actual_new_sl_price'] = result['new_sl_price']
+                    
+                    # Convert to display prices
+                    result['original_sl_price'] = result['original_sl_price'] / rate_multiplier
+                    result['new_sl_price'] = result['new_sl_price'] / rate_multiplier
+                    result['display_symbol'] = original_symbol
                 
                 # Send notification about SL adjustment
                 if self.telegram_client and self.target_channel_id:
                     notification = (
                         f"🔄 STOP LOSS ADJUSTED\n\n"
-                        f"Pair: {symbol}\n"
+                        f"Pair: {original_symbol}\n"
                         f"Position: {'🟢 LONG' if position_type == 'LONG' else '🔴 SHORT'}\n"
                         f"Leverage: {leverage}x\n"
-                        f"Entry Price: {entry_price}\n"
-                        f"Current Price: {current_price}\n"
-                        f"Original SL: {current_sl_price} ({old_leveraged:.2f}%)\n"
-                        f"New SL: {new_sl_price} ({new_leveraged:.2f}%)\n"
+                        f"Entry Price: {entry_price / rate_multiplier if rate_multiplier != 1.0 else entry_price}\n"
+                        f"Current Price: {current_price / rate_multiplier if rate_multiplier != 1.0 else current_price}\n"
+                        f"Original SL: {result['original_sl_price']} ({old_leveraged:.2f}%)\n"
+                        f"New SL: {result['new_sl_price']} ({new_leveraged:.2f}%)\n"
                         f"Default SL Distance: {default_sl_percent}%\n\n"
-                        f"#Binance #{symbol}"
+                        f"#Binance #{original_symbol}"
                     )
                     
                     await self.telegram_client.send_message(self.target_channel_id, notification)

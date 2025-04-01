@@ -6,6 +6,7 @@ from telethon.sessions import StringSession
 
 from trading.signal import SignalParser, SignalFormatter
 from trading.trader import BinanceTrader
+from trading.symbol_mapper import SymbolMapper
 from utils.logger import logger
 from utils.config import Config
 
@@ -25,6 +26,9 @@ class TradingBot:
         self.source_channel_id = int(Config.SOURCE_CHANNEL_ID)
         self.target_channel_id = int(Config.TARGET_CHANNEL_ID)
 
+        # Initialize the symbol mapper
+        self.symbol_mapper = SymbolMapper()
+
         # Initialize components
         self.client = None
         self.trader = BinanceTrader(
@@ -34,6 +38,9 @@ class TradingBot:
         )
         self.parser = SignalParser()
         self.formatter = SignalFormatter()
+        
+        # Log loaded mappings
+        logger.info(f"Loaded {len(self.symbol_mapper.mappings)} symbol mappings")
 
     async def start(self):
         """Start the Telegram client, set up handlers, and load active positions."""
@@ -98,26 +105,28 @@ class TradingBot:
 
         @self.client.on(events.NewMessage(chats=[self.source_channel_id]))
         async def handle_new_message(event):
-            if event.message.reply_to:
-                # Ignore replied messages
-                return
-
             message = event.message
-            logger.info(f"New message received: {message.text[:50]}...")
+            
+            # Log the message details including whether it's a reply
+            is_reply = message.reply_to is not None
+            logger.info(f"New message received (reply: {is_reply}): {message.text[:50]}...")
 
-            # Parse the signal
+            # Parse the signal regardless of whether it's a reply or not
             signal = self.parser.parse(message.text)
 
             if signal:
                 # Format the signal for readability
                 formatted_message = self.formatter.format(signal)
-
-                # Check if this is a profit message (not a trading signal)
+                
+                # Process the message based on its type
                 if signal.get('is_profit_message', False):
                     # For profit messages, we handle profit taking or SL adjustment
+                    # regardless of whether it's a reply or not
+                    logger.info(f"Processing profit message (reply: {is_reply}) for {signal.get('binance_symbol', 'unknown')}")
                     await self._handle_profit_message(signal, formatted_message)
-                else:
+                elif not is_reply:  # Only process new trade signals if they're not replies
                     # For trading signals, execute trades
+                    logger.info(f"Processing trade signal for {signal.get('binance_symbol', 'unknown')}")
                     await self._execute_trades(signal)
 
                     # Send formatted message to target channel if not empty and entry notifications are disabled
@@ -128,6 +137,8 @@ class TradingBot:
                             logger.info("Signal processed and forwarded successfully!")
                         except Exception as e:
                             logger.error(f"Error sending message: {e}")
+                else:
+                    logger.info(f"Skipping trade execution for reply message: {message.text[:50]}...")
             else:
                 logger.info("Message received but not a valid signal")
 
@@ -142,27 +153,26 @@ class TradingBot:
         # Check if the symbol needs mapping
         symbol = signal['binance_symbol']
         mapped_symbol = None
+        rate = 1.0
         
         try:
-            # Read mapping file
-            if os.path.exists("symbol_mappings.json"):
-                with open("symbol_mappings.json", "r") as f:
-                    mappings = json.load(f)
-                
-                # Check for exact match
-                if symbol in mappings:
-                    mapped_symbol = mappings[symbol]
-                # Check for case-insensitive match
-                else:
-                    for key, value in mappings.items():
-                        if key.lower() == symbol.lower():
-                            mapped_symbol = value
-                            break
+            # Use the symbol mapper
+            mapped_symbol, rate = self.symbol_mapper.get_mapped_symbol(symbol)
             
-            # If we found a mapping, update the symbol
+            # If we found a mapping, update the symbol and prices
             if mapped_symbol:
-                logger.info(f"Using mapped symbol for profit message: {symbol} -> {mapped_symbol}")
+                logger.info(f"Using mapped symbol for profit message: {symbol} -> {mapped_symbol} (rate: {rate})")
+                
+                # Update the original symbol
+                original_symbol = symbol
                 symbol = mapped_symbol
+                
+                # Adjust entry price if present
+                if 'entry_price' in signal:
+                    original_price = signal['entry_price']
+                    signal['entry_price'] = original_price * rate
+                    logger.info(f"Adjusted entry price: {original_price} -> {signal['entry_price']}")
+                
                 # Update the formatted message with mapped symbol
                 formatted_message = formatted_message.replace(f"#{signal['binance_symbol']}", f"#{mapped_symbol}")
         except Exception as e:
@@ -194,9 +204,14 @@ class TradingBot:
                 
                 if result['success']:
                     logger.info(f"Successfully adjusted SL for {symbol}: {result['message']}")
+                    
+                    # Convert SL percentages back to original prices for display if needed
+                    original_sl_percent = result.get('original_sl_percent')
+                    new_sl_percent = result.get('new_sl_percent')
+                    
                     # Add to formatted message
-                    if result.get('original_sl_percent') and result.get('new_sl_percent'):
-                        formatted_message += f"\n\n✅ Stop Loss adjusted from {result['original_sl_percent']}% to {result['new_sl_percent']}% to lock in profits"
+                    if original_sl_percent and new_sl_percent:
+                        formatted_message += f"\n\n✅ Stop Loss adjusted from {original_sl_percent:.2f}% to {new_sl_percent:.2f}% to lock in profits"
                 else:
                     logger.warning(f"Failed to adjust SL for {symbol}: {result['message']}")
             except Exception as e:
