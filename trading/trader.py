@@ -1150,12 +1150,12 @@ class BinanceTrader:
             # Step 5: Create take profit and stop loss orders with adjusted prices
             try:
                 tp_result = await self._create_take_profit_order(
-                    symbol, side, position_size, max_leverage, entry_price, Config.DEFAULT_TP_PERCENT
+                    symbol, side, position_size, 20, entry_price, Config.DEFAULT_TP_PERCENT
                 )
                 results['take_profit_orders'].append(tp_result)
                 
                 sl_result = await self._create_stop_loss_order(
-                    symbol, side, position_size, max_leverage, entry_price, Config.DEFAULT_SL_PERCENT
+                    symbol, side, position_size, 20, entry_price, Config.DEFAULT_SL_PERCENT
                 )
                 results['stop_loss_order'] = sl_result
                 

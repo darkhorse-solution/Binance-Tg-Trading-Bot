@@ -216,3 +216,308 @@ Take-Profit:
 2025-04-10 06:08:21,497 - trading_bot - INFO - Trade execution result: {'original_symbol': 'RAREUSDT', 'position': 'LONG', 'entry_order': {'orderId': 3285478223, 'symbol': 'RAREUSDT', 'status': 'NEW', 'clientOrderId': 'x-Cb7ytekJafd23aefe2490f432db990', 'price': '0.0000000', 'avgPrice': '0.00', 'origQty': '6240', 'executedQty': '0', 'cumQty': '0', 'cumQuote': '0.0000000', 'timeInForce': 'GTC', 'type': 'MARKET', 'reduceOnly': False, 'closePosition': False, 'side': 'BUY', 'positionSide': 'BOTH', 'stopPrice': '0.0000000', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1744265301302}, 'stop_loss_order': {'orderId': 3285478364, 'symbol': 'RAREUSDT', 'status': 'NEW', 'clientOrderId': 'x-Cb7ytekJ5619fdba7860023952e578', 'price': '0.0000000', 'avgPrice': '0.00', 'origQty': '0', 'executedQty': '0', 'cumQty': '0', 'cumQuote': '0.0000000', 'timeInForce': 'GTC', 'type': 'STOP_MARKET', 'reduceOnly': True, 'closePosition': True, 'side': 'SELL', 'positionSide': 'BOTH', 'stopPrice': '0.0608900', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'STOP_MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1744265301359}, 'take_profit_orders': [{'orderId': 3285478283, 'symbol': 'RAREUSDT', 'status': 'NEW', 'clientOrderId': 'x-Cb7ytekJc3d1b6588f34ef3778d24a', 'price': '0.0000000', 'avgPrice': '0.00', 'origQty': '0', 'executedQty': '0', 'cumQty': '0', 'cumQuote': '0.0000000', 'timeInForce': 'GTC', 'type': 'TAKE_PROFIT_MARKET', 'reduceOnly': True, 'closePosition': True, 'side': 'SELL', 'positionSide': 'BOTH', 'stopPrice': '0.0647400', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'TAKE_PROFIT_MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1744265301331}], 'errors': [], 'warnings': [], 'symbol': 'RAREUSDT', 'entry_price': 0.0641, 'stop_loss': None, 'take_profit_levels': [{'price': 0.068734, 'percentage': 40}, {'price': 0.06946, 'percentage': 60}, {'price': 0.070088, 'percentage': 80}, {'price': 0.070751, 'percentage': 100}], 'position_size': 6240.0, 'order_monitoring': True}
 2025-04-10 06:08:21,503 - trading_bot - INFO - Entry order 3285478223 filled at 0.0641
 2025-04-10 06:08:22,551 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 06:09:20,995 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 06:16:22,762 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 06:16:52,775 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 06:19:13,739 - telethon.client.updates - INFO - Got difference for channel 2222736366 updates
+2025-04-10 06:19:13,742 - trading_bot - INFO - New message received (reply: False): 🔥 **#RARE****/USDT** (Long📈, x20) 🔥
+
+**Entry** - 0...
+2025-04-10 06:19:13,743 - trading_bot - INFO - Cleaned message: 🔥 #RARE/USDT (Long📈, x20) 🔥
+
+Entry - 0.06738
+Take-Profit:
+
+🥉 0.06873 (40% of profit)
+🥈 0.0694 (60% of profit)
+🥇 0.07008 (80% of profit)
+🚀 0.07075 (100% of profit)
+2025-04-10 06:19:13,743 - trading_bot - INFO - Trying to parse as profit message: 🔥 #RARE/USDT (Long📈, x20) 🔥
+
+Entry - 0.06738
+Take-Profit:
+
+🥉 0.06873 (40% of profit)
+🥈 0.0694 (60% of profit)
+🥇 0.07008 (80% of profit)
+🚀 0.07075 (100% of profit)
+2025-04-10 06:19:13,743 - trading_bot - INFO - Found symbol: RARE/USDT
+2025-04-10 06:19:13,744 - trading_bot - INFO - Found position type: LONG
+2025-04-10 06:19:13,744 - trading_bot - INFO - Found leverage: 20
+2025-04-10 06:19:13,744 - trading_bot - INFO - No price found in any line
+2025-04-10 06:19:13,745 - trading_bot - INFO - Processing trade signal for RAREUSDT
+2025-04-10 06:19:13,777 - trading_bot - INFO - Set leverage for RAREUSDT to 20x
+2025-04-10 06:19:13,777 - trading_bot - INFO - Using fixed amount mode: 150.0 USDT
+2025-04-10 06:19:13,869 - trading_bot - INFO - Amount to buy: 46860.0 × 20 × 0.06402
+2025-04-10 06:19:13,876 - trading_bot - ERROR - Error creating entry order: APIError(code=-2019): Margin is insufficient.
+2025-04-10 06:19:13,876 - trading_failures - ERROR - Symbol: RAREUSDT, Error: Failed to create entry order, Message: Failed to create entry order
+2025-04-10 06:19:13,877 - trading_failures - INFO - Original signal: 🔥 **#RARE****/USDT** (Long📈, x20) 🔥
+
+**Entry** - 0.06738
+**Take-Profit:**
+
+🥉 0.06873 (40% of profit)
+🥈 0.0694 (60% of profit)
+🥇 0.07008 (80% of profit)
+🚀 0.07075 (100% of profit)
+2025-04-10 06:19:13,878 - trading_bot - INFO - New message received (reply: False): 🔥 **#RARE****/USDT** (Long📈, x20) 🔥
+
+**Entry** - 0...
+2025-04-10 06:19:13,878 - trading_bot - INFO - Cleaned message: 🔥 #RARE/USDT (Long📈, x20) 🔥
+
+Entry - 0.06738
+Take-Profit:
+
+🥉 0.06873 (40% of profit)
+🥈 0.0694 (60% of profit)
+🥇 0.07008 (80% of profit)
+🚀 0.07075 (100% of profit)
+2025-04-10 06:19:13,879 - trading_bot - INFO - Trying to parse as profit message: 🔥 #RARE/USDT (Long📈, x20) 🔥
+
+Entry - 0.06738
+Take-Profit:
+
+🥉 0.06873 (40% of profit)
+🥈 0.0694 (60% of profit)
+🥇 0.07008 (80% of profit)
+🚀 0.07075 (100% of profit)
+2025-04-10 06:19:13,879 - trading_bot - INFO - Found symbol: RARE/USDT
+2025-04-10 06:19:13,879 - trading_bot - INFO - Found position type: LONG
+2025-04-10 06:19:13,879 - trading_bot - INFO - Found leverage: 20
+2025-04-10 06:19:13,879 - trading_bot - INFO - No price found in any line
+2025-04-10 06:19:13,880 - trading_bot - INFO - Processing trade signal for RAREUSDT
+2025-04-10 06:19:13,892 - trading_bot - INFO - Set leverage for RAREUSDT to 20x
+2025-04-10 06:19:13,892 - trading_bot - INFO - Using fixed amount mode: 150.0 USDT
+2025-04-10 06:19:13,921 - trading_bot - INFO - Amount to buy: 46860.0 × 20 × 0.06402
+2025-04-10 06:19:13,927 - trading_bot - ERROR - Error creating entry order: APIError(code=-2019): Margin is insufficient.
+2025-04-10 06:19:13,928 - trading_failures - ERROR - Symbol: RAREUSDT, Error: Failed to create entry order, Message: Failed to create entry order
+2025-04-10 06:19:13,928 - trading_failures - INFO - Original signal: 🔥 **#RARE****/USDT** (Long📈, x20) 🔥
+
+**Entry** - 0.06738
+**Take-Profit:**
+
+🥉 0.06873 (40% of profit)
+🥈 0.0694 (60% of profit)
+🥇 0.07008 (80% of profit)
+🚀 0.07075 (100% of profit)
+2025-04-10 06:19:14,011 - trading_bot - ERROR - Failed to send notification: Could not find the input entity for PeerChannel(channel_id=2317551300) (PeerChannel). Please read https://docs.telethon.dev/en/stable/concepts/entities.html to find out more details.
+2025-04-10 06:19:14,012 - trading_bot - INFO - Trade execution result: {'original_symbol': 'RAREUSDT', 'position': 'LONG', 'entry_order': {'error': 'APIError(code=-2019): Margin is insufficient.'}, 'stop_loss_order': None, 'take_profit_orders': [], 'errors': ['Entry order error: Failed to create entry order'], 'warnings': [], 'symbol': 'RAREUSDT', 'entry_price': 0.06402, 'stop_loss': None, 'take_profit_levels': [{'price': 0.068734, 'percentage': 40}, {'price': 0.06946, 'percentage': 60}, {'price': 0.070088, 'percentage': 80}, {'price': 0.070751, 'percentage': 100}], 'position_size': 46860.0}
+2025-04-10 06:19:14,012 - trading_bot - ERROR - Failed to send notification: Could not find the input entity for PeerChannel(channel_id=2317551300) (PeerChannel). Please read https://docs.telethon.dev/en/stable/concepts/entities.html to find out more details.
+2025-04-10 06:19:14,013 - trading_bot - INFO - Trade execution result: {'original_symbol': 'RAREUSDT', 'position': 'LONG', 'entry_order': {'error': 'APIError(code=-2019): Margin is insufficient.'}, 'stop_loss_order': None, 'take_profit_orders': [], 'errors': ['Entry order error: Failed to create entry order'], 'warnings': [], 'symbol': 'RAREUSDT', 'entry_price': 0.06402, 'stop_loss': None, 'take_profit_levels': [{'price': 0.068734, 'percentage': 40}, {'price': 0.06946, 'percentage': 60}, {'price': 0.070088, 'percentage': 80}, {'price': 0.070751, 'percentage': 100}], 'position_size': 46860.0}
+2025-04-10 06:19:52,700 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 06:20:23,309 - trading_bot - INFO - Canceled 2 orders for RAREUSDT
+2025-04-10 06:20:23,310 - trade_profits - INFO - RAREUSDT LONG - MANUAL_OR_LIQUIDATION - Entry: 0.0641, Exit: 0.0640, P/L: -0.4368 USDT (-2.18%)
+2025-04-10 06:20:23,493 - trading_bot - ERROR - Error sending profit message: Could not find the input entity for PeerChannel(channel_id=2317551300) (PeerChannel). Please read https://docs.telethon.dev/en/stable/concepts/entities.html to find out more details.
+2025-04-10 06:20:23,493 - trading_bot - INFO - Sent profit message for manual_or_liquidation exit
+2025-04-10 06:24:21,104 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 06:31:22,867 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 06:31:52,882 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 06:46:22,969 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 06:46:53,002 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 06:49:52,908 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 08:46:23,826 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 08:46:53,980 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 08:49:53,903 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 08:54:22,138 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 10:44:57,031 - telethon.client.updates - INFO - Got difference for channel 1742512586 updates
+2025-04-10 11:31:25,294 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 11:31:55,427 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 11:34:55,281 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 11:39:23,492 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 12:31:55,933 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 12:34:55,725 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 12:39:24,065 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 12:46:26,194 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 12:49:55,876 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 12:54:24,256 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 13:01:26,399 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 13:46:26,909 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 13:46:56,819 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 13:49:56,567 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 13:54:24,805 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 14:01:17,747 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 14:01:27,088 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 14:01:56,972 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 14:04:50,909 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 14:06:03,987 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 14:16:27,381 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 14:16:57,201 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 14:19:51,008 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 14:46:27,776 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 14:46:57,589 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 14:49:51,297 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 14:49:57,222 - telethon.client.updates - INFO - Got difference for channel 1742512586 updates
+2025-04-10 14:51:04,534 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:01:27,926 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:01:57,758 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:04:22,313 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:04:43,901 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:06:04,693 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:15:40,141 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:16:28,075 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:16:57,909 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:18:19,187 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:21:04,815 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:27:19,823 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:27:30,752 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:30:40,264 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:31:28,312 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:33:19,336 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:33:37,759 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:42:30,910 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:45:40,367 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:46:28,452 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:48:37,884 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 15:57:31,071 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 16:00:40,470 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 16:01:28,595 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 16:03:38,009 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 16:30:40,668 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 16:31:29,023 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 16:33:38,304 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 16:57:31,985 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 17:00:40,869 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 17:01:29,341 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 17:03:38,519 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 17:12:32,110 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 17:15:40,983 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 17:16:29,524 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 17:22:05,553 - telethon.client.updates - INFO - Got difference for channel 1717037581 updates
+2025-04-10 17:27:32,271 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 17:30:38,978 - telethon.client.updates - INFO - Got difference for channel 1717037581 updates
+2025-04-10 17:30:41,213 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 17:31:29,758 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 17:31:29,858 - telethon.client.updates - INFO - Got difference for channel 1717037581 updates
+2025-04-10 17:31:29,973 - telethon.client.updates - INFO - Got difference for channel 2627622029 updates
+2025-04-10 17:31:30,064 - telethon.client.updates - INFO - Got difference for channel 2356346200 updates
+2025-04-10 17:32:51,574 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 17:32:51,634 - trading_bot - INFO - New message received (reply: True): **#SPELL****/USDT** (Long📈, x20)
+
+✅ **Price** - 0....
+2025-04-10 17:32:51,671 - trading_bot - INFO - Cleaned message: #SPELL/USDT (Long📈, x20)
+
+✅ Price - 0.0005705
+🔝 Profit - 40%
+2025-04-10 17:32:51,673 - trading_bot - INFO - Trying to parse as profit message: #SPELL/USDT (Long📈, x20)
+
+✅ Price - 0.0005705
+🔝 Profit - 40%
+2025-04-10 17:32:51,674 - trading_bot - INFO - Found symbol: SPELL/USDT
+2025-04-10 17:32:51,678 - trading_bot - INFO - Found position type: LONG
+2025-04-10 17:32:51,678 - trading_bot - INFO - Found leverage: 20
+2025-04-10 17:32:51,680 - trading_bot - INFO - Found price: 0.0005705
+2025-04-10 17:32:51,680 - trading_bot - INFO - Found profit target: 40%
+2025-04-10 17:32:51,681 - trading_bot - INFO - Successfully parsed profit message: SPELL/USDT LONG x20
+2025-04-10 17:32:51,681 - trading_bot - INFO - Successfully parsed as profit message format
+2025-04-10 17:32:51,682 - trading_bot - INFO - Processing profit message (reply: True) for SPELLUSDT
+2025-04-10 17:32:51,685 - trading_bot - INFO - Attempting to adjust SL for SPELLUSDT to lock in 40% profit
+2025-04-10 17:32:51,976 - trading_bot - WARNING - Failed to adjust SL for SPELLUSDT: No open position found for SPELLUSDT
+2025-04-10 17:32:52,078 - trading_bot - ERROR - Error sending profit message: Could not find the input entity for PeerChannel(channel_id=2317551300) (PeerChannel). Please read https://docs.telethon.dev/en/stable/concepts/entities.html to find out more details.
+2025-04-10 17:42:32,385 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 17:45:41,341 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 17:46:29,887 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 17:51:38,751 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 18:00:41,435 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 18:01:30,087 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 18:02:51,909 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 18:15:41,525 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 18:16:30,262 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 18:17:52,049 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 18:21:38,939 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 18:30:41,629 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 18:31:30,551 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 18:32:09,454 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 18:36:39,031 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 18:45:41,750 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 18:46:30,661 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 18:47:09,537 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 19:06:39,236 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 19:14:22,265 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 19:15:39,906 - telethon.client.updates - INFO - Got difference for channel 1717037581 updates
+2025-04-10 19:15:41,934 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 19:16:30,948 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 19:17:09,740 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-10 19:17:09,744 - trading_bot - INFO - New message received (reply: False): 🔥 **#KAS****/USDT** (Long📈, x20) 🔥
+
+**Entry** - 0....
+2025-04-10 19:17:09,745 - trading_bot - INFO - Cleaned message: 🔥 #KAS/USDT (Long📈, x20) 🔥
+
+Entry - 0.06854
+Take-Profit:
+
+🥉 0.06991 (40% of profit)
+🥈 0.0706 (60% of profit)
+🥇 0.07128 (80% of profit)
+🚀 0.07197 (100% of profit)
+2025-04-10 19:17:09,746 - trading_bot - INFO - Trying to parse as profit message: 🔥 #KAS/USDT (Long📈, x20) 🔥
+
+Entry - 0.06854
+Take-Profit:
+
+🥉 0.06991 (40% of profit)
+🥈 0.0706 (60% of profit)
+🥇 0.07128 (80% of profit)
+🚀 0.07197 (100% of profit)
+2025-04-10 19:17:09,746 - trading_bot - INFO - Found symbol: KAS/USDT
+2025-04-10 19:17:09,746 - trading_bot - INFO - Found position type: LONG
+2025-04-10 19:17:09,746 - trading_bot - INFO - Found leverage: 20
+2025-04-10 19:17:09,747 - trading_bot - INFO - No price found in any line
+2025-04-10 19:17:09,749 - trading_bot - INFO - Processing trade signal for KASUSDT
+2025-04-10 19:17:09,795 - trading_bot - INFO - Set leverage for KASUSDT to 20x
+2025-04-10 19:17:09,796 - trading_bot - INFO - Using fixed amount mode: 150.0 USDT
+2025-04-10 19:17:09,936 - trading_bot - INFO - Amount to buy: 44021.0 × 20 × 0.06815
+2025-04-10 19:17:09,946 - trading_bot - ERROR - Error creating entry order: APIError(code=-2019): Margin is insufficient.
+2025-04-10 19:17:09,947 - trading_failures - ERROR - Symbol: KASUSDT, Error: Failed to create entry order, Message: Failed to create entry order
+2025-04-10 19:17:09,948 - trading_failures - INFO - Original signal: 🔥 **#KAS****/USDT** (Long📈, x20) 🔥
+
+**Entry** - 0.06854
+**Take-Profit:**
+
+🥉 0.06991 (40% of profit)
+🥈 0.0706 (60% of profit)
+🥇 0.07128 (80% of profit)
+🚀 0.07197 (100% of profit)
+2025-04-10 19:17:09,949 - trading_bot - INFO - New message received (reply: False): 🔥 **#TUT****/USDT** (Short📉, x20) 🔥
+
+**Entry** - 0...
+2025-04-10 19:17:09,949 - trading_bot - INFO - Cleaned message: 🔥 #TUT/USDT (Short📉, x20) 🔥
+
+Entry - 0.02513
+Take-Profit:
+
+🥉 0.02463 (40% of profit)
+🥈 0.02438 (60% of profit)
+🥇 0.02412 (80% of profit)
+🚀 0.02387 (100% of profit)
+2025-04-10 19:17:09,950 - trading_bot - INFO - Trying to parse as profit message: 🔥 #TUT/USDT (Short📉, x20) 🔥
+
+Entry - 0.02513
+Take-Profit:
+
+🥉 0.02463 (40% of profit)
+🥈 0.02438 (60% of profit)
+🥇 0.02412 (80% of profit)
+🚀 0.02387 (100% of profit)
+2025-04-10 19:17:09,950 - trading_bot - INFO - Found symbol: TUT/USDT
+2025-04-10 19:17:09,950 - trading_bot - INFO - Found position type: SHORT
+2025-04-10 19:17:09,951 - trading_bot - INFO - Found leverage: 20
+2025-04-10 19:17:09,951 - trading_bot - INFO - No price found in any line
+2025-04-10 19:17:09,951 - trading_bot - INFO - Processing trade signal for TUTUSDT
+2025-04-10 19:17:09,959 - trading_bot - INFO - Set leverage for TUTUSDT to 10x
+2025-04-10 19:17:09,959 - trading_bot - INFO - Using fixed amount mode: 150.0 USDT
+2025-04-10 19:17:11,302 - trading_bot - INFO - Amount to buy: 59856.0 × 10 × 0.02506
+2025-04-10 19:17:11,314 - trading_bot - ERROR - Error creating entry order: APIError(code=-2019): Margin is insufficient.
+2025-04-10 19:17:11,314 - trading_failures - ERROR - Symbol: TUTUSDT, Error: Failed to create entry order, Message: Failed to create entry order
+2025-04-10 19:17:11,314 - trading_failures - INFO - Original signal: 🔥 **#TUT****/USDT** (Short📉, x20) 🔥
+
+**Entry** - 0.02513
+**Take-Profit:**
+
+🥉 0.02463 (40% of profit)
+🥈 0.02438 (60% of profit)
+🥇 0.02412 (80% of profit)
+🚀 0.02387 (100% of profit)
+2025-04-10 19:17:11,394 - trading_bot - ERROR - Failed to send notification: Could not find the input entity for PeerChannel(channel_id=2317551300) (PeerChannel). Please read https://docs.telethon.dev/en/stable/concepts/entities.html to find out more details.
+2025-04-10 19:17:11,394 - trading_bot - INFO - Trade execution result: {'original_symbol': 'KASUSDT', 'position': 'LONG', 'entry_order': {'error': 'APIError(code=-2019): Margin is insufficient.'}, 'stop_loss_order': None, 'take_profit_orders': [], 'errors': ['Entry order error: Failed to create entry order'], 'warnings': [], 'symbol': 'KASUSDT', 'entry_price': 0.06854, 'stop_loss': None, 'take_profit_levels': [{'price': 0.069914, 'percentage': 40}, {'price': 0.07066, 'percentage': 60}, {'price': 0.071288, 'percentage': 80}, {'price': 0.071971, 'percentage': 100}], 'position_size': 44021.0}
+2025-04-10 19:17:11,395 - trading_bot - ERROR - Failed to send notification: Could not find the input entity for PeerChannel(channel_id=2317551300) (PeerChannel). Please read https://docs.telethon.dev/en/stable/concepts/entities.html to find out more details.
+2025-04-10 19:17:11,396 - trading_bot - INFO - Trade execution result: {'original_symbol': 'TUTUSDT', 'position': 'SHORT', 'entry_order': {'error': 'APIError(code=-2019): Margin is insufficient.'}, 'stop_loss_order': None, 'take_profit_orders': [], 'errors': ['Entry order error: Failed to create entry order'], 'warnings': [], 'symbol': 'TUTUSDT', 'entry_price': 0.02513, 'stop_loss': None, 'take_profit_levels': [{'price': 0.024634, 'percentage': 40}, {'price': 0.024386, 'percentage': 60}, {'price': 0.024128, 'percentage': 80}, {'price': 0.023871, 'percentage': 100}], 'position_size': 59856.0}
