@@ -1027,7 +1027,7 @@ class BinanceTrader:
         """
         original_symbol = signal['binance_symbol']
         position_type = signal['position_type']
-        original_entry_price = signal['entry_price']
+        original_entry_price = self.get_last_price(original_symbol)
         original_stop_loss = signal.get('stop_loss')
         original_take_profit_levels = signal['take_profit_levels']
         original_message = signal.get('original_message', 'Unknown message')
