@@ -331,13 +331,13 @@ class BinanceTrader:
             if trading_mode == "fixed":
                 # Fixed amount mode
                 CONSTANT_AMOUNT = Config.CONSTANT_AMOUNT
-                amount_to_trade_in_quote = CONSTANT_AMOUNT * leverage
+                amount_to_trade_in_quote = CONSTANT_AMOUNT * leverage - 2
                 logger.info(f"Using fixed amount mode: {CONSTANT_AMOUNT} {QUOTE_ASSET}")
             else:
                 # Wallet ratio mode (default)
                 WALLET_RATIO = Config.WALLET_RATIO
                 account_balance = self.get_balance_in_quote(QUOTE_ASSET)
-                amount_to_trade_in_quote = ((account_balance / 100) * WALLET_RATIO) * leverage
+                amount_to_trade_in_quote = ((account_balance / 100) * WALLET_RATIO) * leverage - 2
                 logger.info(f"Using wallet ratio mode: {WALLET_RATIO}% of {account_balance} {QUOTE_ASSET}")
 
             coin_price = self.get_last_price(pair)
