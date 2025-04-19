@@ -40,6 +40,15 @@ class SignalParser:
                 return profit_message
         except Exception as e:
             logger.error(f"Error trying to parse as profit message: {e}")
+
+        # Try to parse the new signal format with explicit targets and stoploss
+        try:
+            new_format_signal = self._try_parse_new_format(clean_message)
+            if new_format_signal:
+                logger.info("Successfully parsed as new signal format")
+                return new_format_signal
+        except Exception as e:
+            logger.error(f"Error trying to parse as new format signal: {e}")
         
         # If not, continue with the standard signal parsing
         try:
@@ -249,6 +258,135 @@ class SignalParser:
             'is_profit_message': True
         }
 
+    def _try_parse_new_format(self, message: str):
+        """
+        Try to parse the new signal format with explicit targets and stoploss.
+        Example format:
+        ⌛️#NEAR/USDT  ( LONG )
+        🍁 Leverage 👉 20X to 25X
+        ⛩️ Entry ➡️ 2.019 - 2.024
+        💠 Targets :- 2.043 | 2.065 | 2.083 | 2.103 | 2.124 | 2.153
+        🔕 Stoploss = 1.90
+        
+        Args:
+            message (str): The message text to parse
+            
+        Returns:
+            dict: Parsed signal data or None if not matching format
+        """
+        # Split message into lines and remove empty lines
+        lines = [line.strip() for line in message.split('\n') if line.strip()]
+        
+        # Need at least 4 lines for this format
+        if len(lines) < 4:
+            return None
+            
+        # First line should contain the trading pair and position type
+        first_line = lines[0]
+        
+        # Look for trading pair in the format XXX/USDT
+        pairs = re.findall(r'([A-Z0-9]+)/([A-Z0-9]+)', first_line)
+        if not pairs:
+            return None
+            
+        # Extract symbol
+        pair = pairs[0]
+        symbol = f"{pair[0]}/{pair[1]}"
+        logger.info(f"New format - Found symbol: {symbol}")
+        
+        # Extract position type
+        position_type = None
+        if 'LONG' in first_line or '(LONG)' in first_line or '( LONG )' in first_line:
+            position_type = 'LONG'
+        elif 'SHORT' in first_line or '(SHORT)' in first_line or '( SHORT )' in first_line:
+            position_type = 'SHORT'
+            
+        if not position_type:
+            return None
+        logger.info(f"New format - Found position type: {position_type}")
+        
+        # Extract leverage from second line
+        leverage_line = next((line for line in lines if 'Leverage' in line or 'leverage' in line), None)
+        if not leverage_line:
+            return None
+            
+        # Try to find the leverage value (take the lower one if a range is given)
+        leverage_match = re.search(r'(\d+)[Xx]', leverage_line)
+        if not leverage_match:
+            return None
+            
+        leverage = int(leverage_match.group(1))
+        logger.info(f"New format - Found leverage: {leverage}")
+        
+        # Extract entry price from "Entry" line
+        entry_line = next((line for line in lines if 'Entry' in line), None)
+        if not entry_line:
+            return None
+            
+        # Try to find entry price range and use the middle value
+        entry_prices = re.findall(r'(\d+\.\d+)', entry_line)
+        if not entry_prices or len(entry_prices) < 1:
+            return None
+            
+        # Use the average of the entry range or the single value
+        if len(entry_prices) >= 2:
+            entry_price = (float(entry_prices[0]) + float(entry_prices[1])) / 2
+        else:
+            entry_price = float(entry_prices[0])
+            
+        logger.info(f"New format - Found entry price: {entry_price}")
+        
+        # Extract targets from the "Targets" line
+        targets_line = next((line for line in lines if 'Targets' in line or 'targets' in line or 'Target' in line), None)
+        if not targets_line:
+            return None
+            
+        # Find all target prices
+        target_prices = re.findall(r'(\d+\.\d+)', targets_line)
+        if not target_prices or len(target_prices) < 1:
+            return None
+            
+        logger.info(f"New format - Found {len(target_prices)} targets")
+        
+        # Calculate percentages for each target
+        tp_levels = []
+        total_targets = len(target_prices)
+        
+        # Default to equal distribution of percentage
+        percentage_per_target = 100 / total_targets
+        
+        for i, price in enumerate(target_prices):
+            tp_levels.append({
+                'price': float(price),
+                'percentage': percentage_per_target
+            })
+            
+        # Extract stoploss from "Stoploss" line
+        sl_line = next((line for line in lines if 'Stoploss' in line or 'stoploss' in line or 'SL' in line), None)
+        stop_loss = None
+        
+        if sl_line:
+            sl_match = re.search(r'(\d+\.\d+)', sl_line)
+            if sl_match:
+                stop_loss = float(sl_match.group(1))
+                logger.info(f"New format - Found stop loss: {stop_loss}")
+        
+        # Convert symbol format for Binance
+        binance_symbol = symbol.replace('/', '')
+        
+        # Successfully parsed new format signal
+        return {
+            'symbol': symbol,
+            'binance_symbol': binance_symbol,
+            'position_type': position_type,
+            'leverage': leverage,
+            'entry_price': entry_price,
+            'stop_loss': stop_loss,
+            'take_profit_levels': tp_levels,
+            'original_message': message,
+            'is_profit_message': False
+        }
+
 
 class SignalFormatter:
     """
@@ -296,9 +434,9 @@ class SignalFormatter:
         formatted_message += "\nTake Profit Targets:\n"
 
         for i, tp in enumerate(signal['take_profit_levels'], 1):
-            formatted_message += f"TP{i}: {tp['price']} ({tp['percentage']}%)\n"
+            formatted_message += f"TP{i}: {tp['price']} ({tp['percentage']:.1f}%)\n"
 
-        formatted_message += f"\nTotal Profit: {total_profit_percentage}%\n"
+        formatted_message += f"\nTotal Profit: {total_profit_percentage:.1f}%\n"
         formatted_message += f"\n#Binance #{signal['binance_symbol']}"
 
         return formatted_message
