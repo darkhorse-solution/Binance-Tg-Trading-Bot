@@ -521,3 +521,54 @@ Take-Profit:
 2025-04-10 19:17:11,394 - trading_bot - INFO - Trade execution result: {'original_symbol': 'KASUSDT', 'position': 'LONG', 'entry_order': {'error': 'APIError(code=-2019): Margin is insufficient.'}, 'stop_loss_order': None, 'take_profit_orders': [], 'errors': ['Entry order error: Failed to create entry order'], 'warnings': [], 'symbol': 'KASUSDT', 'entry_price': 0.06854, 'stop_loss': None, 'take_profit_levels': [{'price': 0.069914, 'percentage': 40}, {'price': 0.07066, 'percentage': 60}, {'price': 0.071288, 'percentage': 80}, {'price': 0.071971, 'percentage': 100}], 'position_size': 44021.0}
 2025-04-10 19:17:11,395 - trading_bot - ERROR - Failed to send notification: Could not find the input entity for PeerChannel(channel_id=2317551300) (PeerChannel). Please read https://docs.telethon.dev/en/stable/concepts/entities.html to find out more details.
 2025-04-10 19:17:11,396 - trading_bot - INFO - Trade execution result: {'original_symbol': 'TUTUSDT', 'position': 'SHORT', 'entry_order': {'error': 'APIError(code=-2019): Margin is insufficient.'}, 'stop_loss_order': None, 'take_profit_orders': [], 'errors': ['Entry order error: Failed to create entry order'], 'warnings': [], 'symbol': 'TUTUSDT', 'entry_price': 0.02513, 'stop_loss': None, 'take_profit_levels': [{'price': 0.024634, 'percentage': 40}, {'price': 0.024386, 'percentage': 60}, {'price': 0.024128, 'percentage': 80}, {'price': 0.023871, 'percentage': 100}], 'position_size': 59856.0}
+2025-04-19 16:42:46,346 - trading_bot - INFO - Loaded 3 symbol mappings from symbol_mappings.json
+2025-04-19 16:42:46,365 - trading_bot - INFO - Loaded 3 symbol mappings from symbol_mappings.json
+2025-04-19 16:42:46,777 - trading_bot - INFO - Prefetched 20 common symbols
+2025-04-19 16:42:46,884 - trading_bot - INFO - Prefetched leverage info for 580 symbols
+2025-04-19 16:42:46,885 - trading_bot - INFO - Loaded 3 symbol mappings
+2025-04-19 16:42:46,886 - trading_bot - INFO - Starting Trading Bot...
+2025-04-19 16:42:46,886 - trading_bot - INFO - Initializing Telegram client...
+2025-04-19 16:42:46,887 - telethon.network.mtprotosender - INFO - Connecting to 2001:b28:f23f:f005::a:443/TcpFull...
+2025-04-19 16:42:46,955 - telethon.network.mtprotosender - INFO - Connection to 2001:b28:f23f:f005::a:443/TcpFull complete!
+2025-04-19 16:42:47,266 - trading_bot - INFO - Loading active positions from Binance...
+2025-04-19 16:42:47,266 - trading_bot - INFO - Loading active positions from Binance...
+2025-04-19 16:42:47,273 - trading_bot - INFO - Found 1 active positions
+2025-04-19 16:42:47,280 - trading_bot - INFO - Setting up monitoring for existing position: ADAUSDT LONG
+2025-04-19 16:42:47,280 - trading_bot - INFO - Set up order execution monitor for ADAUSDT in background task
+2025-04-19 16:42:47,280 - trading_bot - INFO - Bot started successfully
+2025-04-19 16:42:47,281 - trading_bot - INFO - Bot running. Press Ctrl+C to stop.
+2025-04-19 16:42:47,281 - trading_bot - INFO - Monitoring existing position for ADAUSDT at 0.6323
+2025-04-19 16:43:17,295 - trading_bot - INFO - Loaded 3 symbol mappings from symbol_mappings.json
+2025-04-19 16:43:17,327 - trading_bot - INFO - Loaded 3 symbol mappings from symbol_mappings.json
+2025-04-19 16:43:18,105 - trading_bot - INFO - Prefetched 20 common symbols
+2025-04-19 16:43:18,239 - trading_bot - INFO - Prefetched leverage info for 580 symbols
+2025-04-19 16:43:18,241 - trading_bot - INFO - Loaded 3 symbol mappings
+2025-04-19 16:43:18,241 - trading_bot - INFO - Starting Trading Bot...
+2025-04-19 16:43:18,241 - trading_bot - INFO - Initializing Telegram client...
+2025-04-19 16:43:18,247 - telethon.network.mtprotosender - INFO - Connecting to 2001:b28:f23f:f005::a:443/TcpFull...
+2025-04-19 16:43:18,322 - telethon.network.mtprotosender - INFO - Connection to 2001:b28:f23f:f005::a:443/TcpFull complete!
+2025-04-19 16:43:18,737 - trading_bot - INFO - Loading active positions from Binance...
+2025-04-19 16:43:18,737 - trading_bot - INFO - Loading active positions from Binance...
+2025-04-19 16:43:18,747 - trading_bot - INFO - Found 1 active positions
+2025-04-19 16:43:18,754 - trading_bot - INFO - Setting up monitoring for existing position: ADAUSDT LONG
+2025-04-19 16:43:18,754 - trading_bot - INFO - Set up order execution monitor for ADAUSDT in background task
+2025-04-19 16:43:18,754 - trading_bot - INFO - Bot started successfully
+2025-04-19 16:43:18,754 - trading_bot - INFO - Bot running. Press Ctrl+C to stop.
+2025-04-19 16:43:18,755 - trading_bot - INFO - Monitoring existing position for ADAUSDT at 0.6323
+2025-04-19 16:44:45,625 - trading_bot - INFO - Loaded 3 symbol mappings from symbol_mappings.json
+2025-04-19 16:44:45,644 - trading_bot - INFO - Loaded 3 symbol mappings from symbol_mappings.json
+2025-04-19 16:44:46,145 - trading_bot - INFO - Prefetched 20 common symbols
+2025-04-19 16:44:46,235 - trading_bot - INFO - Prefetched leverage info for 580 symbols
+2025-04-19 16:44:46,242 - trading_bot - INFO - Loaded 3 symbol mappings
+2025-04-19 16:44:46,242 - trading_bot - INFO - Starting Trading Bot...
+2025-04-19 16:44:46,242 - trading_bot - INFO - Initializing Telegram client...
+2025-04-19 16:44:46,243 - telethon.network.mtprotosender - INFO - Connecting to 2001:b28:f23f:f005::a:443/TcpFull...
+2025-04-19 16:44:46,318 - telethon.network.mtprotosender - INFO - Connection to 2001:b28:f23f:f005::a:443/TcpFull complete!
+2025-04-19 16:44:46,653 - trading_bot - INFO - Loading active positions from Binance...
+2025-04-19 16:44:46,653 - trading_bot - INFO - Loading active positions from Binance...
+2025-04-19 16:44:46,661 - trading_bot - INFO - Found 1 active positions
+2025-04-19 16:44:46,667 - trading_bot - INFO - Setting up monitoring for existing position: ADAUSDT LONG
+2025-04-19 16:44:46,668 - trading_bot - INFO - Set up order execution monitor for ADAUSDT in background task
+2025-04-19 16:44:46,668 - trading_bot - INFO - Bot started successfully
+2025-04-19 16:44:46,668 - trading_bot - INFO - Bot running. Press Ctrl+C to stop.
+2025-04-19 16:44:46,669 - trading_bot - INFO - Monitoring existing position for ADAUSDT at 0.6323

@@ -323,18 +323,16 @@ class SignalParser:
         if not entry_line:
             return None
             
-        # Try to find entry price range and use the middle value
+        # Try to find entry price range
         entry_prices = re.findall(r'(\d+\.\d+)', entry_line)
         if not entry_prices or len(entry_prices) < 1:
             return None
             
-        # Use the average of the entry range or the single value
-        if len(entry_prices) >= 2:
-            entry_price = (float(entry_prices[0]) + float(entry_prices[1])) / 2
-        else:
-            entry_price = float(entry_prices[0])
+        # If we have a range, store both values; if single value, store it twice
+        entry_price_low = float(entry_prices[0])
+        entry_price_high = float(entry_prices[1]) if len(entry_prices) >= 2 else entry_price_low
             
-        logger.info(f"New format - Found entry price: {entry_price}")
+        logger.info(f"New format - Found entry price range: {entry_price_low} - {entry_price_high}")
         
         # Extract targets from the "Targets" line
         targets_line = next((line for line in lines if 'Targets' in line or 'targets' in line or 'Target' in line), None)
@@ -380,11 +378,15 @@ class SignalParser:
             'binance_symbol': binance_symbol,
             'position_type': position_type,
             'leverage': leverage,
-            'entry_price': entry_price,
+            'entry_price_low': entry_price_low,
+            'entry_price_high': entry_price_high,
+            'entry_price': (entry_price_low + entry_price_high) / 2,  # Average for compatibility
             'stop_loss': stop_loss,
             'take_profit_levels': tp_levels,
             'original_message': message,
-            'is_profit_message': False
+            'is_profit_message': False,
+            'is_entry_range': True,  # Flag for entry price range
+            'target_prices': [float(price) for price in target_prices]  # Store original targets
         }
 
 
@@ -419,12 +421,18 @@ class SignalFormatter:
         # Calculate total profit percentage
         total_profit_percentage = sum(tp['percentage'] for tp in signal['take_profit_levels'])
 
+        # Handle entry price range if present
+        if signal.get('is_entry_range', False):
+            entry_price_display = f"{signal['entry_price_low']} - {signal['entry_price_high']}"
+        else:
+            entry_price_display = f"{signal['entry_price']}"
+
         formatted_message = (
             f"📊 BINANCE SIGNAL\n\n"
             f"Pair: {signal['symbol']}\n"
             f"Position: {position_display}\n"
             f"Leverage: {signal['leverage']}x\n"
-            f"Entry: {signal['entry_price']}\n"
+            f"Entry: {entry_price_display}\n"
         )
 
         # Add stop loss if available
