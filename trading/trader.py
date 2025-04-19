@@ -19,7 +19,7 @@ class BinanceTrader:
     """
 
     def __init__(self, api_key: str, api_secret: str,
-                 default_risk_percent: float = 2.0, max_leverage: int = 20,
+                 default_risk_percent: float = 2.0, max_leverage: int = 25,
                  target_channel_id: int = None):
         """
         Initialize the Binance trader with API credentials.
@@ -133,7 +133,7 @@ class BinanceTrader:
 
     async def send_entry_message(self, symbol: str, position_type: str, leverage: int, 
                                entry_price: float, sl_price: float, tp_price: float,
-                               position_size: float):
+                               position_size: float, entry_type: str = None):
         """
         Send a message when a new position is entered.
         
@@ -145,6 +145,7 @@ class BinanceTrader:
             sl_price (float): Stop loss price
             tp_price (float): Take profit price
             position_size (float): Position size
+            entry_type (str, optional): Entry type information (MARKET or LIMIT)
         """
         if not self.telegram_client or not self.target_channel_id or not Config.ENABLE_ENTRY_NOTIFICATIONS:
             logger.warning("Cannot send entry message: Telegram client or target channel not set, or notifications disabled")
@@ -153,26 +154,55 @@ class BinanceTrader:
         try:
             # Calculate SL and TP percentages
             if position_type == 'LONG':
-                sl_percent = ((entry_price - sl_price) / entry_price) * 100 * leverage
-                tp_percent = ((tp_price - entry_price) / entry_price) * 100 * leverage
+                if sl_price > 0:
+                    sl_percent = ((entry_price - sl_price) / entry_price) * 100 * leverage
+                else:
+                    sl_percent = 0
+                    
+                if tp_price > 0:
+                    tp_percent = ((tp_price - entry_price) / entry_price) * 100 * leverage
+                else:
+                    tp_percent = 0
+                    
                 emoji = "🟢"
             else:  # SHORT
-                sl_percent = ((sl_price - entry_price) / entry_price) * 100 * leverage
-                tp_percent = ((entry_price - tp_price) / entry_price) * 100 * leverage
+                if sl_price > 0:
+                    sl_percent = ((sl_price - entry_price) / entry_price) * 100 * leverage
+                else:
+                    sl_percent = 0
+                    
+                if tp_price > 0:
+                    tp_percent = ((entry_price - tp_price) / entry_price) * 100 * leverage
+                else:
+                    tp_percent = 0
+                    
                 emoji = "🔴"
                 
-            # Format the message
+            # Format the message with entry type information
+            if entry_type:
+                entry_info = f"Entry: {entry_type}"
+            else:
+                entry_info = f"Entry Price: {entry_price:.6f}"
+                
             message = (
                 f"{emoji} NEW TRADE ENTRY\n\n"
                 f"Pair: {symbol}\n"
                 f"Position: {position_type}\n"
                 f"Leverage: {leverage}x\n"
-                f"Entry Price: {entry_price:.6f}\n"
+                f"{entry_info}\n"
                 f"Size: {position_size:.4f}\n\n"
-                f"Stop Loss: {sl_price:.6f} ({sl_percent:.2f}%)\n"
-                f"Take Profit: {tp_price:.6f} ({tp_percent:.2f}%)\n\n"
-                f"#{position_type.lower()} #{symbol}"
             )
+            
+            # Add SL info if available
+            if sl_price > 0:
+                message += f"Stop Loss: {sl_price:.6f} ({sl_percent:.2f}%)\n"
+            
+            # Add TP info if available
+            if tp_price > 0:
+                message += f"Take Profit: {tp_price:.6f} ({tp_percent:.2f}%)\n"
+                
+            # Add hashtags
+            message += f"\n#{position_type.lower()} #{symbol}"
             
             # Send the message
             await self.telegram_client.send_message(self.target_channel_id, message)
@@ -180,7 +210,6 @@ class BinanceTrader:
             
         except Exception as e:
             logger.error(f"Error sending entry message: {e}")
-
     def get_symbol_info(self, symbol: str) -> Dict:
         """
         Get information about a trading symbol, using cache when possible.
@@ -1141,10 +1170,54 @@ class BinanceTrader:
         """
         original_symbol = signal['binance_symbol']
         position_type = signal['position_type']
-        original_entry_price = signal.get('entry_price', self.get_last_price(original_symbol))
+        
+        # Get current price for this asset
+        current_price = self.get_last_price(original_symbol)
+        
+        # Handle entry price range if present
+        is_entry_range = signal.get('is_entry_range', False)
+        if is_entry_range:
+            entry_price_low = signal.get('entry_price_low')
+            entry_price_high = signal.get('entry_price_high')
+            
+            # Determine if current price is favorable and what order type to use
+            if position_type == 'LONG':
+                # For Long positions:
+                # - If price is below the range, it's better than the signal (market entry)
+                # - If price is within the range, it's acceptable (market entry)
+                # - If price is above the range, it's worse than the signal (limit entry at high end of range)
+                if current_price > entry_price_high:
+                    # Current price is worse for profit, use limit order at high range
+                    use_limit_order = True
+                    entry_price = entry_price_high
+                else:
+                    # Current price is in range or better, use market order with current price
+                    use_limit_order = False
+                    entry_price = current_price
+            else:  # SHORT
+                # For Short positions:
+                # - If price is above the range, it's better than the signal (market entry)
+                # - If price is within the range, it's acceptable (market entry)
+                # - If price is below the range, it's worse than the signal (limit entry at low end of range)
+                if current_price < entry_price_low:
+                    # Current price is worse for profit, use limit order at low range
+                    use_limit_order = True
+                    entry_price = entry_price_low
+                else:
+                    # Current price is in range or better, use market order with current price
+                    use_limit_order = False
+                    entry_price = current_price
+        else:
+            # No range provided, just use the single entry price from signal
+            entry_price = signal.get('entry_price', current_price)
+            use_limit_order = False
+        
         original_stop_loss = signal.get('stop_loss')
         original_take_profit_levels = signal['take_profit_levels']
         original_message = signal.get('original_message', 'Unknown message')
+        
+        # Original targets from signal (informational only since we'll use config)
+        target_prices = signal.get('target_prices', [])
 
         results = {
             'original_symbol': original_symbol,
@@ -1153,7 +1226,10 @@ class BinanceTrader:
             'stop_loss_order': None,
             'take_profit_orders': [],
             'errors': [],
-            'warnings': []
+            'warnings': [],
+            'entry_price': entry_price,
+            'current_price': current_price,
+            'use_limit_order': use_limit_order
         }
 
         try:
@@ -1162,7 +1238,6 @@ class BinanceTrader:
             
             # Initialize variables for potential mapping
             symbol = original_symbol
-            entry_price = original_entry_price
             stop_loss = original_stop_loss
             take_profit_levels = original_take_profit_levels.copy() if original_take_profit_levels else []
             rate_multiplier = 1.0
@@ -1177,7 +1252,8 @@ class BinanceTrader:
                     rate_multiplier = rate
                     
                     # Adjust prices according to the rate
-                    entry_price = original_entry_price * rate
+                    entry_price = entry_price * rate
+                    current_price = current_price * rate
                     
                     if original_stop_loss:
                         stop_loss = original_stop_loss * rate
@@ -1245,7 +1321,27 @@ class BinanceTrader:
             # Step 4: Create the main entry order
             side = "BUY" if position_type == 'LONG' else "SELL"
             try:
-                entry_order = await self._create_entry_order(symbol, side, position_size, entry_price)
+                if use_limit_order:
+                    # Create a limit order at the designated price
+                    entry_order = self.client.futures_create_order(
+                        symbol=symbol,
+                        side=side,
+                        type="LIMIT",
+                        quantity=position_size,
+                        price=entry_price,
+                        timeInForce="GTC"  # Good Till Cancelled
+                    )
+                    logger.info(f"Created limit entry order for {symbol}, {side} at {entry_price}: {entry_order['orderId']}")
+                else:
+                    # Use market order
+                    entry_order = self.client.futures_create_order(
+                        symbol=symbol,
+                        side=side,
+                        type="MARKET",
+                        quantity=position_size
+                    )
+                    logger.info(f"Created market entry order for {symbol}, {side} at {current_price}: {entry_order['orderId']}")
+                
                 results['entry_order'] = entry_order
                 
                 if not entry_order or 'orderId' not in entry_order:
@@ -1309,47 +1405,29 @@ class BinanceTrader:
                 results['warnings'].append(f"Failed to create stop loss order: {str(e)}")
                 # We can continue with just the entry order, but it's risky
             
-            # Step 6: Create take profit order
+            # Step 6: Create take profit order using the config settings instead of signal levels
             try:
-                # Use first take profit level from signal
-                if take_profit_levels and len(take_profit_levels) > 0:
-                    first_tp = take_profit_levels[0]
-                    tp_price = first_tp['price']
-                    price_precision = self.get_price_precision(symbol)
-                    tp_price = round(tp_price, price_precision) if price_precision else tp_price
-                    
-                    # Create take profit order
-                    tp_result = self.client.futures_create_order(
-                        symbol=symbol,
-                        side='SELL' if side == 'BUY' else 'BUY',
-                        type="TAKE_PROFIT_MARKET",
-                        stopPrice=tp_price,
-                        closePosition=True  # Close the entire position
-                    )
-                    logger.info(f"Created take profit order for {symbol} at {tp_price}: {tp_result['orderId']}")
-                    results['take_profit_orders'].append(tp_result)
-                else:
-                    # Calculate default take profit using configured percentage
-                    default_tp_percent = float(Config.DEFAULT_TP_PERCENT)
-                    price_precision = self.get_price_precision(symbol)
-                    
-                    if position_type == 'LONG':
-                        tp_price = entry_price * (1 + (default_tp_percent / (100 * max_leverage)))
-                    else:  # SHORT
-                        tp_price = entry_price * (1 - (default_tp_percent / (100 * max_leverage)))
-                    
-                    tp_price = round(tp_price, price_precision) if price_precision else tp_price
-                    
-                    # Create take profit order
-                    tp_result = self.client.futures_create_order(
-                        symbol=symbol,
-                        side='SELL' if side == 'BUY' else 'BUY',
-                        type="TAKE_PROFIT_MARKET",
-                        stopPrice=tp_price,
-                        closePosition=True  # Close the entire position
-                    )
-                    logger.info(f"Created default take profit order for {symbol} at {tp_price}: {tp_result['orderId']}")
-                    results['take_profit_orders'].append(tp_result)
+                # Calculate take profit using configured percentage
+                default_tp_percent = float(Config.DEFAULT_TP_PERCENT)
+                price_precision = self.get_price_precision(symbol)
+                
+                if position_type == 'LONG':
+                    tp_price = entry_price * (1 + (default_tp_percent / (100 * max_leverage)))
+                else:  # SHORT
+                    tp_price = entry_price * (1 - (default_tp_percent / (100 * max_leverage)))
+                
+                tp_price = round(tp_price, price_precision) if price_precision else tp_price
+                
+                # Create take profit order
+                tp_result = self.client.futures_create_order(
+                    symbol=symbol,
+                    side='SELL' if side == 'BUY' else 'BUY',
+                    type="TAKE_PROFIT_MARKET",
+                    stopPrice=tp_price,
+                    closePosition=True  # Close the entire position
+                )
+                logger.info(f"Created take profit order for {symbol} at {tp_price} (using config %): {tp_result['orderId']}")
+                results['take_profit_orders'].append(tp_result)
             except Exception as e:
                 logger.error(f"Error creating take profit order: {e}")
                 results['warnings'].append(f"Failed to create take profit order: {str(e)}")
@@ -1378,6 +1456,9 @@ class BinanceTrader:
                     display_sl_price = sl_price / rate_multiplier
                     display_tp_price = tp_price / rate_multiplier
                 
+                # Add information about entry type (market vs limit)
+                entry_type_info = f"LIMIT@{display_entry_price:.6f}" if use_limit_order else f"MARKET@{display_entry_price:.6f}"
+                
                 await self.send_entry_message(
                     symbol=original_symbol,  # Use original symbol for display
                     position_type=position_type,
@@ -1385,7 +1466,8 @@ class BinanceTrader:
                     entry_price=display_entry_price,
                     sl_price=display_sl_price,
                     tp_price=display_tp_price,
-                    position_size=position_size
+                    position_size=position_size,
+                    entry_type=entry_type_info  # Pass entry type info for display
                 )
                 
             # Step 7: Set up order monitoring
@@ -1428,7 +1510,7 @@ class BinanceTrader:
             
             results['errors'].append(error_msg)
             return results
-
+    
     async def load_and_monitor_active_positions(self):
         """
         Load all active positions from Binance and set up monitoring for them.
