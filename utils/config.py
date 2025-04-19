@@ -39,8 +39,8 @@ class Config:
     POSITION_MONITOR_TIMEOUT = int(os.getenv("POSITION_MONITOR_TIMEOUT", "30"))  # Minutes
     
     # Order settings
-    DEFAULT_TP_PERCENT = float(os.getenv("DEFAULT_TP_PERCENT", "100.0"))
-    DEFAULT_SL_PERCENT = float(os.getenv("DEFAULT_SL_PERCENT", "150.0"))
+    DEFAULT_TP_PERCENT = float(os.getenv("DEFAULT_TP_PERCENT", "20.0"))  # Default take profit percentage
+    DEFAULT_SL_PERCENT = float(os.getenv("DEFAULT_SL_PERCENT", "10.0"))  # Default stop loss percentage
     
     # Notification settings
     ENABLE_ENTRY_NOTIFICATIONS = os.getenv("ENABLE_ENTRY_NOTIFICATIONS", "true").lower() == "true"

@@ -167,10 +167,10 @@ class BinanceTrader:
                 f"Pair: {symbol}\n"
                 f"Position: {position_type}\n"
                 f"Leverage: {leverage}x\n"
-                f"Entry Price: {entry_price:.4f}\n"
+                f"Entry Price: {entry_price:.6f}\n"
                 f"Size: {position_size:.4f}\n\n"
-                f"Stop Loss: {sl_price:.4f} ({sl_percent:.2f}%)\n"
-                f"Take Profit: {tp_price:.4f} ({tp_percent:.2f}%)\n\n"
+                f"Stop Loss: {sl_price:.6f} ({sl_percent:.2f}%)\n"
+                f"Take Profit: {tp_price:.6f} ({tp_percent:.2f}%)\n\n"
                 f"#{position_type.lower()} #{symbol}"
             )
             
@@ -380,38 +380,28 @@ class BinanceTrader:
             return {"error": str(e)}
 
     async def _create_stop_loss_order(self, symbol: str, side: str,
-                                      quantity: float, leverage: int, entry_price: float, sl_percent: float) -> Dict:
+                                      stop_price: float) -> Dict:
         """
-        Create a stop loss order.
+        Create a stop loss order using STOP_MARKET with closePosition=True.
 
         Args:
             symbol (str): Trading symbol
             side (str): SIDE_BUY or SIDE_SELL (opposite of entry order)
-            quantity (float): Order quantity
-            leverage (int): Leverage used
-            entry_price (float): Entry price
-            sl_percent (float): Stop loss percentage
+            stop_price (float): Stop price level
 
         Returns:
             dict: Order response
         """
-        price_precision = self.get_price_precision(symbol)
-        if side == 'BUY':
-            sl_price = entry_price * (leverage - sl_percent / 100) / leverage
-        else:
-            sl_price = entry_price * (leverage + sl_percent / 100) / leverage
-        sl_price = round(sl_price, price_precision)
-
         try:
             order = self.client.futures_create_order(
                 symbol=symbol,
-                side='SELL' if side == 'BUY' else 'BUY',
+                side=side,
                 type="STOP_MARKET",
-                stopPrice=sl_price,
+                stopPrice=stop_price,
                 closePosition=True  # Close the entire position
             )
 
-            logger.info(f"Created stop loss order for {symbol} at {sl_price}: {order['orderId']}")
+            logger.info(f"Created stop loss order for {symbol} at {stop_price}: {order['orderId']}")
             return order
 
         except Exception as e:
@@ -419,39 +409,28 @@ class BinanceTrader:
             return {"error": str(e)}
 
     async def _create_take_profit_order(self, symbol: str, side: str,
-                                        quantity: float, leverage, entry_price, tp_percent) -> Dict:
+                                       take_profit_price: float) -> Dict:
         """
-        Create a take profit order.
+        Create a take profit order using TAKE_PROFIT_MARKET with closePosition=True.
 
         Args:
             symbol (str): Trading symbol
             side (str): SIDE_BUY or SIDE_SELL (opposite of entry order)
-            quantity (float): Order quantity
-            leverage (int): Leverage used
-            entry_price (float): Entry price
-            tp_percent (float): Take profit percentage
+            take_profit_price (float): Take profit price level
 
         Returns:
             dict: Order response
         """
-        price_precision = self.get_price_precision(symbol)
-        if side == 'BUY':
-            tp_price = entry_price * (leverage + tp_percent / 100) / leverage
-        else:
-            tp_price = entry_price * (leverage - tp_percent / 100) / leverage
-
-        tp_price = round(tp_price, price_precision)
-
         try:
             order = self.client.futures_create_order(
                 symbol=symbol,
-                side='SELL' if side == 'BUY' else 'BUY',
+                side=side,
                 type="TAKE_PROFIT_MARKET",
-                stopPrice=tp_price,
+                stopPrice=take_profit_price,
                 closePosition=True  # Close the entire position
             )
 
-            logger.info(f"Created take profit order for {symbol} at {tp_price}: {order['orderId']}")
+            logger.info(f"Created take profit order for {symbol} at {take_profit_price}: {order['orderId']}")
             return order
 
         except Exception as e:
@@ -643,8 +622,8 @@ class BinanceTrader:
                 f"Pair: {display_symbol}\n"
                 f"Position: {profit_data['position_type']}\n"
                 f"Leverage: {profit_data['leverage']}x\n"
-                f"Entry: {entry_price:.4f}\n"
-                f"Exit: {exit_price:.4f}\n"
+                f"Entry: {entry_price:.6f}\n"
+                f"Exit: {exit_price:.6f}\n"
                 f"Size: {profit_data['position_size']:.4f}\n\n"
                 f"P/L: {profit_data['absolute_profit']:.4f} USDT ({profit_data['leveraged_percentage']:.2f}%)\n"
                 f"Raw Price Change: {profit_data['price_diff_percent']:.2f}%\n\n"
@@ -657,6 +636,7 @@ class BinanceTrader:
             # Also log to the profit logger
             profit_logger.info(
                 f"{display_symbol} {profit_data['position_type']} - {exit_description} - " +
+                f"Entry: {entry_price:.6f}, Exit: {exit_price:.6f}, " +
                 f"P/L: {profit_data['absolute_profit']:.4f} USDT ({profit_data['leveraged_percentage']:.2f}%)"
             )
             
@@ -750,28 +730,30 @@ class BinanceTrader:
                 check_count += 1
                 
                 try:
-                    # Check if SL order was filled
-                    try:
-                        sl_status = self.client.futures_get_order(symbol=symbol, orderId=sl_order_id)
-                        if sl_status['status'] == 'FILLED' and not exit_processed:
-                            position_closed = True
-                            exit_type = "stop_loss"
-                            exit_processed = True
-                            
-                            # Get the exit price
-                            if 'avgPrice' in sl_status and float(sl_status['avgPrice']) > 0:
-                                exit_price = float(sl_status['avgPrice'])
-                            else:
-                                exit_price = float(sl_status['stopPrice'])
-                            
-                            # Cancel TP order
-                            try:
-                                self.client.futures_cancel_order(symbol=symbol, orderId=tp_order_id)
-                            except Exception as e:
-                                logger.error(f"Error canceling TP after SL hit: {e}")
-                    except Exception as e:
-                        # If we can't check SL, it might be gone/filled
-                        logger.warning(f"Could not check SL order {sl_order_id}: {e}")
+                    # Check if SL order was filled (only if we have a valid SL order ID)
+                    if sl_order_id > 0:
+                        try:
+                            sl_status = self.client.futures_get_order(symbol=symbol, orderId=sl_order_id)
+                            if sl_status['status'] == 'FILLED' and not exit_processed:
+                                position_closed = True
+                                exit_type = "stop_loss"
+                                exit_processed = True
+                                
+                                # Get the exit price
+                                if 'avgPrice' in sl_status and float(sl_status['avgPrice']) > 0:
+                                    exit_price = float(sl_status['avgPrice'])
+                                else:
+                                    exit_price = float(sl_status['stopPrice'])
+                                
+                                # Cancel TP order
+                                if tp_order_id > 0:
+                                    try:
+                                        self.client.futures_cancel_order(symbol=symbol, orderId=tp_order_id)
+                                    except Exception as e:
+                                        logger.error(f"Error canceling TP after SL hit: {e}")
+                        except Exception as e:
+                            # If we can't check SL, it might be gone/filled
+                            logger.warning(f"Could not check SL order {sl_order_id}: {e}")
                     
                     if position_closed:
                         break
@@ -779,28 +761,30 @@ class BinanceTrader:
                     # Small pause between API calls
                     await asyncio.sleep(1)
                     
-                    # Check if TP order was filled
-                    try:
-                        tp_status = self.client.futures_get_order(symbol=symbol, orderId=tp_order_id)
-                        if tp_status['status'] == 'FILLED' and not exit_processed:
-                            position_closed = True
-                            exit_type = "take_profit"
-                            exit_processed = True
-                            
-                            # Get the exit price
-                            if 'avgPrice' in tp_status and float(tp_status['avgPrice']) > 0:
-                                exit_price = float(tp_status['avgPrice'])
-                            else:
-                                exit_price = float(tp_status['stopPrice'])
-                            
-                            # Cancel SL order
-                            try:
-                                self.client.futures_cancel_order(symbol=symbol, orderId=sl_order_id)
-                            except Exception as e:
-                                logger.error(f"Error canceling SL after TP hit: {e}")
-                    except Exception as e:
-                        # If we can't check TP, it might be gone/filled
-                        logger.warning(f"Could not check TP order {tp_order_id}: {e}")
+                    # Check if TP order was filled (only if we have a valid TP order ID)
+                    if tp_order_id > 0:
+                        try:
+                            tp_status = self.client.futures_get_order(symbol=symbol, orderId=tp_order_id)
+                            if tp_status['status'] == 'FILLED' and not exit_processed:
+                                position_closed = True
+                                exit_type = "take_profit"
+                                exit_processed = True
+                                
+                                # Get the exit price
+                                if 'avgPrice' in tp_status and float(tp_status['avgPrice']) > 0:
+                                    exit_price = float(tp_status['avgPrice'])
+                                else:
+                                    exit_price = float(tp_status['stopPrice'])
+                                
+                                # Cancel SL order
+                                if sl_order_id > 0:
+                                    try:
+                                        self.client.futures_cancel_order(symbol=symbol, orderId=sl_order_id)
+                                    except Exception as e:
+                                        logger.error(f"Error canceling SL after TP hit: {e}")
+                        except Exception as e:
+                            # If we can't check TP, it might be gone/filled
+                            logger.warning(f"Could not check TP order {tp_order_id}: {e}")
                     
                     if position_closed:
                         break
@@ -918,315 +902,7 @@ class BinanceTrader:
         self._monitor_tasks[task_key] = task
         
         logger.info(f"Set up order execution monitor for {symbol} in background task")
-
-    async def load_and_monitor_active_positions(self):
-        """
-        Load all active positions from Binance and set up monitoring for them.
-        This should be called when the bot starts to ensure all open positions are tracked.
-        """
-        try:
-            logger.info("Loading active positions from Binance...")
-            
-            # Get all open positions
-            positions = self.client.futures_position_information()
-            active_positions = [p for p in positions if float(p['positionAmt']) != 0]
-            
-            if not active_positions:
-                logger.info("No active positions found on Binance")
-                return
-            
-            logger.info(f"Found {len(active_positions)} active positions")
-            
-            # For each active position, find associated orders and set up monitoring
-            for position in active_positions:
-                symbol = position['symbol']
-                position_amt = float(position['positionAmt'])
-                position_type = "LONG" if position_amt > 0 else "SHORT"
-                entry_price = float(position['entryPrice'])
-                leverage = min(self.get_max_leverage(symbol), int(Config.MAX_LEVERAGE))
-                
-                # Get open orders for this symbol
-                try:
-                    open_orders = self.client.futures_get_open_orders(symbol=symbol)
-                    
-                    # Find stop loss and take profit orders
-                    sl_order = next((o for o in open_orders if o['type'] in ['STOP_MARKET', 'STOP'] 
-                                    and ((position_amt > 0 and o['side'] == 'SELL') 
-                                        or (position_amt < 0 and o['side'] == 'BUY'))), None)
-                    
-                    tp_order = next((o for o in open_orders if o['type'] in ['TAKE_PROFIT_MARKET', 'TAKE_PROFIT'] 
-                                    and ((position_amt > 0 and o['side'] == 'SELL') 
-                                        or (position_amt < 0 and o['side'] == 'BUY'))), None)
-                    
-                    # If we have both SL and TP orders, set up monitoring
-                    if sl_order and tp_order:
-                        logger.info(f"Setting up monitoring for existing position: {symbol} {position_type}")
-                        
-                        # Use a dummy entry order ID (we don't need it since position is already filled)
-                        dummy_entry_id = int(time.time() * 1000)  # Use current timestamp as dummy ID
-                        
-                        # Set up monitoring with the found orders
-                        self.setup_order_monitor(
-                            symbol=symbol,
-                            entry_order_id=dummy_entry_id,
-                            sl_order_id=sl_order['orderId'],
-                            tp_order_id=tp_order['orderId'],
-                            entry_price=entry_price,
-                            position_size=abs(position_amt),
-                            position_type=position_type,
-                            leverage=leverage
-                        )
-                        
-                    else:
-                        # If we don't have both SL and TP orders, log but don't monitor
-                        logger.warning(f"Found position for {symbol} but not all required orders (SL: {bool(sl_order)}, TP: {bool(tp_order)})")
-                        
-                except Exception as e:
-                    logger.error(f"Error processing position for {symbol}: {e}")
-                    
-        except Exception as e:
-            logger.error(f"Error loading active positions: {e}")
-
-    async def set_leverage_for_symbol(self, symbol: str, leverage: int) -> bool:
-        """
-        Set the leverage for a specific symbol on Binance Futures.
         
-        Args:
-            symbol (str): Trading symbol
-            leverage (int): Leverage to set
-            
-        Returns:
-            bool: True if leverage was set successfully, False otherwise
-        """
-        try:
-            response = self.client.futures_change_leverage(
-                symbol=symbol, 
-                leverage=leverage
-            )
-            
-            actual_leverage = int(response['leverage'])
-            logger.info(f"Set leverage for {symbol} to {actual_leverage}x")
-            
-            # Update the cache with the new leverage
-            self._leverage_cache[symbol] = actual_leverage
-            
-            return True
-        except Exception as e:
-            logger.error(f"Failed to set leverage for {symbol} to {leverage}x: {e}")
-            return False
-
-    async def execute_signal(self, signal: Dict) -> Dict:
-        """
-        Execute trades based on a parsed signal.
-
-        Args:
-            signal (dict): The parsed signal data
-
-        Returns:
-            dict: Trade execution results
-        """
-        original_symbol = signal['binance_symbol']
-        position_type = signal['position_type']
-        original_entry_price = self.get_last_price(original_symbol)
-        original_stop_loss = signal.get('stop_loss')
-        original_take_profit_levels = signal['take_profit_levels']
-        original_message = signal.get('original_message', 'Unknown message')
-
-        results = {
-            'original_symbol': original_symbol,
-            'position': position_type,
-            'entry_order': None,
-            'stop_loss_order': None,
-            'take_profit_orders': [],
-            'errors': [],
-            'warnings': []
-        }
-
-        try:
-            # Step 1: Check the maximum supported leverage and apply symbol mapping if needed
-            max_leverage = min(self.get_max_leverage(original_symbol), int(Config.MAX_LEVERAGE))
-            
-            # Initialize variables for potential mapping
-            symbol = original_symbol
-            entry_price = original_entry_price
-            stop_loss = original_stop_loss
-            take_profit_levels = original_take_profit_levels.copy() if original_take_profit_levels else []
-            rate_multiplier = 1.0
-            
-            if max_leverage == 0:
-                # Symbol is not supported, check if we have a mapping
-                mapped_symbol, rate = self.symbol_mapper.get_mapped_symbol(original_symbol)
-                
-                if mapped_symbol:
-                    logger.info(f"Using mapped symbol with rate adjustment: {original_symbol} -> {mapped_symbol} (rate: {rate})")
-                    symbol = mapped_symbol
-                    rate_multiplier = rate
-                    
-                    # Adjust prices according to the rate
-                    entry_price = original_entry_price * rate
-                    
-                    if original_stop_loss:
-                        stop_loss = original_stop_loss * rate
-                    
-                    # Adjust all take profit levels
-                    for i, tp in enumerate(take_profit_levels):
-                        tp['price'] = tp['price'] * rate
-                    
-                    # Try again with the mapped symbol
-                    max_leverage = min(self.get_max_leverage(symbol), int(Config.MAX_LEVERAGE))
-                    results['mapped_symbol'] = mapped_symbol
-                    results['rate_multiplier'] = rate
-                    
-                    # Store the mapping for future reference (needed for profit calculation)
-                    self._active_trades[symbol] = {
-                        'original_symbol': original_symbol,
-                        'rate': rate
-                    }
-                
-                # If still not supported after mapping
-                if max_leverage == 0:
-                    await self.handle_trading_failure(
-                        original_symbol, 
-                        "Symbol not supported on Binance Futures", 
-                        Exception("Unsupported symbol"), 
-                        original_message
-                    )
-                    results['errors'].append(f"Symbol {original_symbol} not supported on Binance Futures")
-                    return results
-            
-            # Step 2: Set the leverage on Binance
-            leverage_set = await self.set_leverage_for_symbol(symbol, max_leverage)
-            if not leverage_set:
-                await self.handle_trading_failure(
-                    original_symbol, 
-                    "Failed to set leverage on Binance", 
-                    Exception("Leverage setting failed"), 
-                    original_message
-                )
-                results['errors'].append(f"Failed to set leverage to {max_leverage}x for {symbol}")
-                return results
-            
-            # Store adjusted values in results
-            results['symbol'] = symbol
-            results['entry_price'] = entry_price
-            results['stop_loss'] = stop_loss
-            results['take_profit_levels'] = take_profit_levels
-            
-            # Step 3: Calculate position size using risk management
-            try:
-                position_size, _ = self.calculate_coin_amount_to_buy(
-                    symbol, max_leverage
-                )
-                results['position_size'] = position_size
-            except Exception as e:
-                await self.handle_trading_failure(
-                    original_symbol, 
-                    "Failed to calculate position size", 
-                    e, 
-                    original_message
-                )
-                results['errors'].append(f"Position sizing error: {str(e)}")
-                return results
-
-            # Step 4: Create the main entry order
-            side = "BUY" if position_type == 'LONG' else "SELL"
-            try:
-                entry_order = await self._create_entry_order(symbol, side, position_size, entry_price)
-                results['entry_order'] = entry_order
-                
-                if not entry_order or 'orderId' not in entry_order:
-                    raise Exception("Failed to create entry order")
-                    
-            except Exception as e:
-                await self.handle_trading_failure(
-                    original_symbol, 
-                    "Failed to create entry order", 
-                    e, 
-                    original_message
-                )
-                results['errors'].append(f"Entry order error: {str(e)}")
-                return results
-
-            # Step 5: Create take profit and stop loss orders with adjusted prices
-            try:
-                tp_result = await self._create_take_profit_order(
-                    symbol, side, position_size, 20, entry_price, Config.DEFAULT_TP_PERCENT
-                )
-                results['take_profit_orders'].append(tp_result)
-                
-                sl_result = await self._create_stop_loss_order(
-                    symbol, side, position_size, 20, entry_price, Config.DEFAULT_SL_PERCENT
-                )
-                results['stop_loss_order'] = sl_result
-                
-                # Get the actual prices from the orders for notifications
-                sl_price = float(sl_result['stopPrice']) if 'stopPrice' in sl_result else 0
-                tp_price = float(tp_result['stopPrice']) if 'stopPrice' in tp_result else 0
-                
-                # Send entry message with all details
-                # Note: For display, convert back to original prices if needed
-                display_entry_price = entry_price
-                display_sl_price = sl_price
-                display_tp_price = tp_price
-                
-                if rate_multiplier != 1.0:
-                    # Convert back to original prices for display
-                    display_entry_price = entry_price / rate_multiplier
-                    display_sl_price = sl_price / rate_multiplier
-                    display_tp_price = tp_price / rate_multiplier
-                
-                if Config.ENABLE_ENTRY_NOTIFICATIONS:
-                    await self.send_entry_message(
-                        symbol=original_symbol,  # Use original symbol for display
-                        position_type=position_type,
-                        leverage=max_leverage,
-                        entry_price=display_entry_price,
-                        sl_price=display_sl_price,
-                        tp_price=display_tp_price,
-                        position_size=position_size
-                    )
-                
-            except Exception as e:
-                logger.error(f"Error creating TP/SL orders for {symbol}: {e}")
-                results['warnings'].append(f"Created entry order, but failed to set TP/SL: {str(e)}")
-                # We still return success since the main order was placed
-
-            # Step 6: Set up order monitoring to clean up orders when SL or TP is triggered
-            if (results['entry_order'] and 'orderId' in results['entry_order'] and
-                results['stop_loss_order'] and 'orderId' in results['stop_loss_order'] and
-                results['take_profit_orders'] and 'orderId' in results['take_profit_orders'][0]):
-                
-                self.setup_order_monitor(
-                    symbol,
-                    results['entry_order']['orderId'],
-                    results['stop_loss_order']['orderId'],
-                    results['take_profit_orders'][0]['orderId'],
-                    entry_price,
-                    position_size,
-                    position_type,
-                    max_leverage,
-                    original_symbol=original_symbol,  # Pass original symbol for proper display
-                    rate_multiplier=rate_multiplier  # Pass rate for price adjustments
-                )
-                results['order_monitoring'] = True
-
-            return results
-
-        except Exception as e:
-            error_msg = f"Error executing signal for {original_symbol}: {e}"
-            logger.error(error_msg)
-            
-            # Handle any unexpected errors
-            await self.handle_trading_failure(
-                original_symbol, 
-                "Unexpected error during trade execution", 
-                e, 
-                original_message
-            )
-            
-            results['errors'].append(error_msg)
-            return results
-
     async def adjust_stop_loss_for_profit_target(self, symbol: str, profit_target: float) -> dict:
         """
         Adjust the stop loss order for an open position based on current price,
@@ -1424,3 +1100,481 @@ class BinanceTrader:
             logger.error(f"Error adjusting stop loss for {symbol}: {e}")
             result['message'] = f"Error: {str(e)}"
             return result
+    
+    async def set_leverage_for_symbol(self, symbol: str, leverage: int) -> bool:
+        """
+        Set the leverage for a specific symbol on Binance Futures.
+        
+        Args:
+            symbol (str): Trading symbol
+            leverage (int): Leverage to set
+            
+        Returns:
+            bool: True if leverage was set successfully, False otherwise
+        """
+        try:
+            response = self.client.futures_change_leverage(
+                symbol=symbol, 
+                leverage=leverage
+            )
+            
+            actual_leverage = int(response['leverage'])
+            logger.info(f"Set leverage for {symbol} to {actual_leverage}x")
+            
+            # Update the cache with the new leverage
+            self._leverage_cache[symbol] = actual_leverage
+            
+            return True
+        except Exception as e:
+            logger.error(f"Failed to set leverage for {symbol} to {leverage}x: {e}")
+            return False
+            
+    async def execute_signal(self, signal: Dict) -> Dict:
+        """
+        Execute trades based on a parsed signal.
+
+        Args:
+            signal (dict): The parsed signal data
+
+        Returns:
+            dict: Trade execution results
+        """
+        original_symbol = signal['binance_symbol']
+        position_type = signal['position_type']
+        original_entry_price = signal.get('entry_price', self.get_last_price(original_symbol))
+        original_stop_loss = signal.get('stop_loss')
+        original_take_profit_levels = signal['take_profit_levels']
+        original_message = signal.get('original_message', 'Unknown message')
+
+        results = {
+            'original_symbol': original_symbol,
+            'position': position_type,
+            'entry_order': None,
+            'stop_loss_order': None,
+            'take_profit_orders': [],
+            'errors': [],
+            'warnings': []
+        }
+
+        try:
+            # Step 1: Check the maximum supported leverage and apply symbol mapping if needed
+            max_leverage = min(self.get_max_leverage(original_symbol), int(Config.MAX_LEVERAGE))
+            
+            # Initialize variables for potential mapping
+            symbol = original_symbol
+            entry_price = original_entry_price
+            stop_loss = original_stop_loss
+            take_profit_levels = original_take_profit_levels.copy() if original_take_profit_levels else []
+            rate_multiplier = 1.0
+            
+            if max_leverage == 0:
+                # Symbol is not supported, check if we have a mapping
+                mapped_symbol, rate = self.symbol_mapper.get_mapped_symbol(original_symbol)
+                
+                if mapped_symbol:
+                    logger.info(f"Using mapped symbol with rate adjustment: {original_symbol} -> {mapped_symbol} (rate: {rate})")
+                    symbol = mapped_symbol
+                    rate_multiplier = rate
+                    
+                    # Adjust prices according to the rate
+                    entry_price = original_entry_price * rate
+                    
+                    if original_stop_loss:
+                        stop_loss = original_stop_loss * rate
+                    
+                    # Adjust all take profit levels
+                    for i, tp in enumerate(take_profit_levels):
+                        tp['price'] = tp['price'] * rate
+                    
+                    # Try again with the mapped symbol
+                    max_leverage = min(self.get_max_leverage(symbol), int(Config.MAX_LEVERAGE))
+                    results['mapped_symbol'] = mapped_symbol
+                    results['rate_multiplier'] = rate
+                    
+                    # Store the mapping for future reference (needed for profit calculation)
+                    self._active_trades[symbol] = {
+                        'original_symbol': original_symbol,
+                        'rate': rate
+                    }
+                
+                # If still not supported after mapping
+                if max_leverage == 0:
+                    await self.handle_trading_failure(
+                        original_symbol, 
+                        "Symbol not supported on Binance Futures", 
+                        Exception("Unsupported symbol"), 
+                        original_message
+                    )
+                    results['errors'].append(f"Symbol {original_symbol} not supported on Binance Futures")
+                    return results
+            
+            # Step 2: Set the leverage on Binance
+            leverage_set = await self.set_leverage_for_symbol(symbol, max_leverage)
+            if not leverage_set:
+                await self.handle_trading_failure(
+                    original_symbol, 
+                    "Failed to set leverage on Binance", 
+                    Exception("Leverage setting failed"), 
+                    original_message
+                )
+                results['errors'].append(f"Failed to set leverage to {max_leverage}x for {symbol}")
+                return results
+            
+            # Store adjusted values in results
+            results['symbol'] = symbol
+            results['entry_price'] = entry_price
+            results['stop_loss'] = stop_loss
+            results['take_profit_levels'] = take_profit_levels
+            
+            # Step 3: Calculate position size using risk management
+            try:
+                position_size, _ = self.calculate_coin_amount_to_buy(
+                    symbol, max_leverage
+                )
+                results['position_size'] = position_size
+            except Exception as e:
+                await self.handle_trading_failure(
+                    original_symbol, 
+                    "Failed to calculate position size", 
+                    e, 
+                    original_message
+                )
+                results['errors'].append(f"Position sizing error: {str(e)}")
+                return results
+
+            # Step 4: Create the main entry order
+            side = "BUY" if position_type == 'LONG' else "SELL"
+            try:
+                entry_order = await self._create_entry_order(symbol, side, position_size, entry_price)
+                results['entry_order'] = entry_order
+                
+                if not entry_order or 'orderId' not in entry_order:
+                    raise Exception("Failed to create entry order")
+                    
+            except Exception as e:
+                await self.handle_trading_failure(
+                    original_symbol, 
+                    "Failed to create entry order", 
+                    e, 
+                    original_message
+                )
+                results['errors'].append(f"Entry order error: Failed to create entry order")
+                return results
+
+            # Step 5: Create stop loss order if provided in signal
+            try:
+                sl_result = None
+                if stop_loss:
+                    # Use provided stop loss from signal
+                    logger.info(f"Using stop loss from signal: {stop_loss}")
+                    # Get price precision for the symbol
+                    price_precision = self.get_price_precision(symbol)
+                    sl_price = round(stop_loss, price_precision) if price_precision else stop_loss
+                    
+                    # Create stop loss order
+                    sl_result = self.client.futures_create_order(
+                        symbol=symbol,
+                        side='SELL' if side == 'BUY' else 'BUY',
+                        type="STOP_MARKET",
+                        stopPrice=sl_price,
+                        closePosition=True  # Close the entire position
+                    )
+                    logger.info(f"Created stop loss order for {symbol} at {sl_price}: {sl_result['orderId']}")
+                else:
+                    # Calculate default stop loss using configured percentage
+                    default_sl_percent = float(Config.DEFAULT_SL_PERCENT)
+                    price_precision = self.get_price_precision(symbol)
+                    
+                    if position_type == 'LONG':
+                        sl_price = entry_price * (1 - (default_sl_percent / (100 * max_leverage)))
+                    else:  # SHORT
+                        sl_price = entry_price * (1 + (default_sl_percent / (100 * max_leverage)))
+                    
+                    sl_price = round(sl_price, price_precision) if price_precision else sl_price
+                    
+                    # Create stop loss order
+                    sl_result = self.client.futures_create_order(
+                        symbol=symbol,
+                        side='SELL' if side == 'BUY' else 'BUY',
+                        type="STOP_MARKET",
+                        stopPrice=sl_price,
+                        closePosition=True  # Close the entire position
+                    )
+                    logger.info(f"Created default stop loss order for {symbol} at {sl_price}: {sl_result['orderId']}")
+                
+                results['stop_loss_order'] = sl_result
+                
+            except Exception as e:
+                logger.error(f"Error creating stop loss order: {e}")
+                results['warnings'].append(f"Failed to create stop loss order: {str(e)}")
+                # We can continue with just the entry order, but it's risky
+            
+            # Step 6: Create take profit order
+            try:
+                # Use first take profit level from signal
+                if take_profit_levels and len(take_profit_levels) > 0:
+                    first_tp = take_profit_levels[0]
+                    tp_price = first_tp['price']
+                    price_precision = self.get_price_precision(symbol)
+                    tp_price = round(tp_price, price_precision) if price_precision else tp_price
+                    
+                    # Create take profit order
+                    tp_result = self.client.futures_create_order(
+                        symbol=symbol,
+                        side='SELL' if side == 'BUY' else 'BUY',
+                        type="TAKE_PROFIT_MARKET",
+                        stopPrice=tp_price,
+                        closePosition=True  # Close the entire position
+                    )
+                    logger.info(f"Created take profit order for {symbol} at {tp_price}: {tp_result['orderId']}")
+                    results['take_profit_orders'].append(tp_result)
+                else:
+                    # Calculate default take profit using configured percentage
+                    default_tp_percent = float(Config.DEFAULT_TP_PERCENT)
+                    price_precision = self.get_price_precision(symbol)
+                    
+                    if position_type == 'LONG':
+                        tp_price = entry_price * (1 + (default_tp_percent / (100 * max_leverage)))
+                    else:  # SHORT
+                        tp_price = entry_price * (1 - (default_tp_percent / (100 * max_leverage)))
+                    
+                    tp_price = round(tp_price, price_precision) if price_precision else tp_price
+                    
+                    # Create take profit order
+                    tp_result = self.client.futures_create_order(
+                        symbol=symbol,
+                        side='SELL' if side == 'BUY' else 'BUY',
+                        type="TAKE_PROFIT_MARKET",
+                        stopPrice=tp_price,
+                        closePosition=True  # Close the entire position
+                    )
+                    logger.info(f"Created default take profit order for {symbol} at {tp_price}: {tp_result['orderId']}")
+                    results['take_profit_orders'].append(tp_result)
+            except Exception as e:
+                logger.error(f"Error creating take profit order: {e}")
+                results['warnings'].append(f"Failed to create take profit order: {str(e)}")
+                # We can continue with just entry and stop loss
+                
+            # Get SL and TP prices for notification
+            sl_price = 0
+            if results.get('stop_loss_order') and 'stopPrice' in results['stop_loss_order']:
+                sl_price = float(results['stop_loss_order']['stopPrice'])
+            
+            tp_price = 0
+            if results.get('take_profit_orders') and len(results['take_profit_orders']) > 0:
+                if 'stopPrice' in results['take_profit_orders'][0]:
+                    tp_price = float(results['take_profit_orders'][0]['stopPrice'])
+
+            # Send entry notification if enabled
+            if Config.ENABLE_ENTRY_NOTIFICATIONS:
+                # Note: For display, convert back to original prices if needed
+                display_entry_price = entry_price
+                display_sl_price = sl_price
+                display_tp_price = tp_price
+                
+                if rate_multiplier != 1.0:
+                    # Convert back to original prices for display
+                    display_entry_price = entry_price / rate_multiplier
+                    display_sl_price = sl_price / rate_multiplier
+                    display_tp_price = tp_price / rate_multiplier
+                
+                await self.send_entry_message(
+                    symbol=original_symbol,  # Use original symbol for display
+                    position_type=position_type,
+                    leverage=max_leverage,
+                    entry_price=display_entry_price,
+                    sl_price=display_sl_price,
+                    tp_price=display_tp_price,
+                    position_size=position_size
+                )
+                
+            # Step 7: Set up order monitoring
+            if (results.get('entry_order') and 'orderId' in results['entry_order'] and
+                ((results.get('stop_loss_order') and 'orderId' in results['stop_loss_order']) or not results.get('stop_loss_order')) and
+                ((results.get('take_profit_orders') and len(results['take_profit_orders']) > 0 and 'orderId' in results['take_profit_orders'][0]) or not results.get('take_profit_orders'))):
+                
+                # Get order IDs or use 0 if not available
+                entry_order_id = results['entry_order']['orderId']
+                sl_order_id = results['stop_loss_order']['orderId'] if results.get('stop_loss_order') else 0
+                tp_order_id = results['take_profit_orders'][0]['orderId'] if results.get('take_profit_orders') and len(results['take_profit_orders']) > 0 else 0
+                
+                self.setup_order_monitor(
+                    symbol,
+                    entry_order_id,
+                    sl_order_id,
+                    tp_order_id,
+                    entry_price,
+                    position_size,
+                    position_type,
+                    max_leverage,
+                    original_symbol=original_symbol,  # Pass original symbol for proper display
+                    rate_multiplier=rate_multiplier  # Pass rate for price adjustments
+                )
+                results['order_monitoring'] = True
+
+            return results
+
+        except Exception as e:
+            error_msg = f"Error executing signal for {original_symbol}: {e}"
+            logger.error(error_msg)
+            
+            # Handle any unexpected errors
+            await self.handle_trading_failure(
+                original_symbol, 
+                "Unexpected error during trade execution", 
+                e, 
+                original_message
+            )
+            
+            results['errors'].append(error_msg)
+            return results
+
+    async def load_and_monitor_active_positions(self):
+        """
+        Load all active positions from Binance and set up monitoring for them.
+        This should be called when the bot starts to ensure all open positions are tracked.
+        """
+        try:
+            logger.info("Loading active positions from Binance...")
+            
+            # Get all open positions
+            positions = self.client.futures_position_information()
+            active_positions = [p for p in positions if float(p['positionAmt']) != 0]
+            
+            if not active_positions:
+                logger.info("No active positions found on Binance")
+                return
+            
+            logger.info(f"Found {len(active_positions)} active positions")
+            
+            # For each active position, find associated orders and set up monitoring
+            for position in active_positions:
+                symbol = position['symbol']
+                position_amt = float(position['positionAmt'])
+                position_type = "LONG" if position_amt > 0 else "SHORT"
+                entry_price = float(position['entryPrice'])
+                leverage = min(self.get_max_leverage(symbol), int(Config.MAX_LEVERAGE))
+                
+                # Get open orders for this symbol
+                try:
+                    open_orders = self.client.futures_get_open_orders(symbol=symbol)
+                    
+                    # Find stop loss and take profit orders
+                    sl_order = next((o for o in open_orders if o['type'] in ['STOP_MARKET', 'STOP'] 
+                                    and ((position_amt > 0 and o['side'] == 'SELL') 
+                                        or (position_amt < 0 and o['side'] == 'BUY'))), None)
+                    
+                    tp_order = next((o for o in open_orders if o['type'] in ['TAKE_PROFIT_MARKET', 'TAKE_PROFIT'] 
+                                    and ((position_amt > 0 and o['side'] == 'SELL') 
+                                        or (position_amt < 0 and o['side'] == 'BUY'))), None)
+                    
+                    # If we have both SL and TP orders, set up monitoring
+                    if sl_order and tp_order:
+                        logger.info(f"Setting up monitoring for existing position: {symbol} {position_type}")
+                        
+                        # Use a dummy entry order ID (we don't need it since position is already filled)
+                        dummy_entry_id = int(time.time() * 1000)  # Use current timestamp as dummy ID
+                        
+                        # Set up monitoring with the found orders
+                        self.setup_order_monitor(
+                            symbol=symbol,
+                            entry_order_id=dummy_entry_id,
+                            sl_order_id=sl_order['orderId'],
+                            tp_order_id=tp_order['orderId'],
+                            entry_price=entry_price,
+                            position_size=abs(position_amt),
+                            position_type=position_type,
+                            leverage=leverage
+                        )
+                    elif sl_order:
+                        # If we only have SL order but no TP, we can still monitor
+                        logger.info(f"Setting up monitoring for existing position with SL only: {symbol} {position_type}")
+                        dummy_entry_id = int(time.time() * 1000)
+                        dummy_tp_id = 0  # Use 0 as placeholder for missing TP order
+                        
+                        self.setup_order_monitor(
+                            symbol=symbol,
+                            entry_order_id=dummy_entry_id,
+                            sl_order_id=sl_order['orderId'],
+                            tp_order_id=dummy_tp_id,
+                            entry_price=entry_price,
+                            position_size=abs(position_amt),
+                            position_type=position_type,
+                            leverage=leverage
+                        )
+                    elif tp_order:
+                        # If we only have TP order but no SL, we can still monitor
+                        logger.info(f"Setting up monitoring for existing position with TP only: {symbol} {position_type}")
+                        dummy_entry_id = int(time.time() * 1000)
+                        dummy_sl_id = 0  # Use 0 as placeholder for missing SL order
+                        
+                        self.setup_order_monitor(
+                            symbol=symbol,
+                            entry_order_id=dummy_entry_id,
+                            sl_order_id=dummy_sl_id,
+                            tp_order_id=tp_order['orderId'],
+                            entry_price=entry_price,
+                            position_size=abs(position_amt),
+                            position_type=position_type,
+                            leverage=leverage
+                        )
+                    else:
+                        # If we don't have any orders, but still have a position, create default SL and TP
+                        logger.warning(f"Found position for {symbol} without SL or TP orders. Creating default orders.")
+                        
+                        # Calculate default SL and TP prices
+                        price_precision = self.get_price_precision(symbol)
+                        default_sl_percent = float(Config.DEFAULT_SL_PERCENT)
+                        default_tp_percent = float(Config.DEFAULT_TP_PERCENT)
+                        
+                        try:
+                            if position_type == 'LONG':
+                                sl_price = entry_price * (1 - (default_sl_percent / (100 * leverage)))
+                                tp_price = entry_price * (1 + (default_tp_percent / (100 * leverage)))
+                            else:  # SHORT
+                                sl_price = entry_price * (1 + (default_sl_percent / (100 * leverage)))
+                                tp_price = entry_price * (1 - (default_tp_percent / (100 * leverage)))
+                                
+                            sl_price = round(sl_price, price_precision) if price_precision else sl_price
+                            tp_price = round(tp_price, price_precision) if price_precision else tp_price
+                            
+                            # Create SL order
+                            sl_order = self.client.futures_create_order(
+                                symbol=symbol,
+                                side='SELL' if position_type == 'LONG' else 'BUY',
+                                type="STOP_MARKET",
+                                stopPrice=sl_price,
+                                closePosition=True
+                            )
+                            logger.info(f"Created default stop loss order for {symbol} at {sl_price}")
+                            
+                            # Create TP order
+                            tp_order = self.client.futures_create_order(
+                                symbol=symbol,
+                                side='SELL' if position_type == 'LONG' else 'BUY',
+                                type="TAKE_PROFIT_MARKET",
+                                stopPrice=tp_price,
+                                closePosition=True
+                            )
+                            logger.info(f"Created default take profit order for {symbol} at {tp_price}")
+                            
+                            # Now set up monitoring
+                            dummy_entry_id = int(time.time() * 1000)
+                            self.setup_order_monitor(
+                                symbol=symbol,
+                                entry_order_id=dummy_entry_id,
+                                sl_order_id=sl_order['orderId'],
+                                tp_order_id=tp_order['orderId'],
+                                entry_price=entry_price,
+                                position_size=abs(position_amt),
+                                position_type=position_type,
+                                leverage=leverage
+                            )
+                        except Exception as e:
+                            logger.error(f"Error creating default SL/TP orders for existing position {symbol}: {e}")
+                        
+                except Exception as e:
+                    logger.error(f"Error processing position for {symbol}: {e}")
+                    
+        except Exception as e:
+            logger.error(f"Error loading active positions: {e}")
