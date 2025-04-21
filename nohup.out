@@ -572,3 +572,1138 @@ Take-Profit:
 2025-04-19 16:44:46,668 - trading_bot - INFO - Bot started successfully
 2025-04-19 16:44:46,668 - trading_bot - INFO - Bot running. Press Ctrl+C to stop.
 2025-04-19 16:44:46,669 - trading_bot - INFO - Monitoring existing position for ADAUSDT at 0.6323
+2025-04-19 17:52:33,215 - trading_bot - INFO - Loaded 3 symbol mappings from symbol_mappings.json
+2025-04-19 17:52:33,238 - trading_bot - INFO - Loaded 3 symbol mappings from symbol_mappings.json
+2025-04-19 17:52:33,711 - trading_bot - INFO - Prefetched 20 common symbols
+2025-04-19 17:52:33,779 - trading_bot - INFO - Prefetched leverage info for 580 symbols
+2025-04-19 17:52:33,780 - trading_bot - INFO - Loaded 3 symbol mappings
+2025-04-19 17:52:33,780 - trading_bot - INFO - Starting Trading Bot...
+2025-04-19 17:52:33,781 - trading_bot - INFO - Initializing Telegram client...
+2025-04-19 17:52:33,783 - telethon.network.mtprotosender - INFO - Connecting to 2001:b28:f23f:f005::a:443/TcpFull...
+2025-04-19 17:52:33,857 - telethon.network.mtprotosender - INFO - Connection to 2001:b28:f23f:f005::a:443/TcpFull complete!
+2025-04-19 17:52:34,201 - trading_bot - INFO - Loading active positions from Binance...
+2025-04-19 17:52:34,201 - trading_bot - INFO - Loading active positions from Binance...
+2025-04-19 17:52:34,208 - trading_bot - INFO - Found 1 active positions
+2025-04-19 17:52:34,215 - trading_bot - INFO - Setting up monitoring for existing position: ADAUSDT LONG
+2025-04-19 17:52:34,216 - trading_bot - INFO - Set up order execution monitor for ADAUSDT in background task
+2025-04-19 17:52:34,216 - trading_bot - INFO - Bot started successfully
+2025-04-19 17:52:34,216 - trading_bot - INFO - Bot running. Press Ctrl+C to stop.
+2025-04-19 17:52:34,217 - trading_bot - INFO - Monitoring existing position for ADAUSDT at 0.6323
+2025-04-19 18:07:34,400 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-19 18:07:34,989 - telethon.client.updates - INFO - Got difference for channel 1391574614 updates
+2025-04-19 18:07:34,993 - trading_bot - INFO - New message received (reply: True): **🔰 855$ ℙ𝕣𝕠𝕗𝕚𝕥 𝔼𝕒𝕤𝕚𝕝𝕪 𝕄𝕒𝕕𝕖⚡️💥
+
+📨 𝕍𝕚𝕡 ➡️ ****@Gref...
+2025-04-19 18:07:34,994 - trading_bot - INFO - Cleaned message: 🔰 855$ ℙ𝕣𝕠𝕗𝕚𝕥 𝔼𝕒𝕤𝕚𝕝𝕪 𝕄𝕒𝕕𝕖⚡️💥
+
+📨 𝕍𝕚𝕡 ➡️ @Grefton ⬅️ ℂ𝕠𝕟𝕥𝕒𝕔𝕥
+2025-04-19 18:07:34,995 - trading_bot - INFO - Trying to parse as profit message: 🔰 855$ ℙ𝕣𝕠𝕗𝕚𝕥 𝔼𝕒𝕤𝕚𝕝𝕪 𝕄𝕒𝕕𝕖⚡️💥
+
+📨 𝕍𝕚𝕡 ➡️ @Grefton ⬅️ ℂ𝕠𝕟𝕥𝕒𝕔𝕥
+2025-04-19 18:07:34,995 - trading_bot - INFO - Not enough lines for profit message format
+2025-04-19 18:07:34,995 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-19 18:07:34,996 - trading_bot - INFO - Message received but not a valid signal
+2025-04-19 18:10:05,892 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 18:22:34,719 - telethon.client.updates - INFO - Got difference for channel 2552442439 updates
+2025-04-19 18:29:35,766 - telethon.client.updates - INFO - Got difference for channel 1391574614 updates
+2025-04-19 18:29:35,767 - trading_bot - INFO - New message received (reply: False): 🚨**STOP BUYING SIGNALS**🚨**
+
+We accept 60 more peo...
+2025-04-19 18:29:35,767 - trading_bot - INFO - Cleaned message: 🚨STOP BUYING SIGNALS🚨
+
+We accept 60 more people FOR MASSIVE PROFITABLE SIGNALS ✅👇
+
+🚀HURRY UP JOIN FASTLY🚀
+  CLICK HERE FAST...👇
+
+👉[1 PREMIUM LINK ](https://t.me/+1_Ypl4J_0bEyMDA0)🔐 ⭐️
+
+👉[2 PREMIUM LINK](https://t.me/+1_Ypl4J_0bEyMDA0) 🔐 🤭
+2025-04-19 18:29:35,767 - trading_bot - INFO - Trying to parse as profit message: 🚨STOP BUYING SIGNALS🚨
+
+We accept 60 more people FOR MASSIVE PROFITABLE SIGNALS ✅👇
+
+🚀HURRY UP JOIN FASTLY🚀
+  CLICK HERE FAST...👇
+
+👉[1 PREMIUM LINK ](https://t.me/+1_Ypl4J_0bEyMDA0)🔐 ⭐️
+
+👉[2 PREMIUM LINK](https://t.me/+1_Ypl4J_0bEyMDA0) 🔐 🤭
+2025-04-19 18:29:35,768 - trading_bot - INFO - No trading pair found in line: 🚨STOP BUYING SIGNALS🚨
+2025-04-19 18:29:35,768 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-19 18:29:35,768 - trading_bot - INFO - Message received but not a valid signal
+2025-04-19 18:40:06,236 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 18:52:34,762 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-19 18:55:06,342 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 19:10:06,486 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 19:23:11,114 - telethon.client.updates - INFO - Got difference for channel 1316448339 updates
+2025-04-19 19:25:06,602 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 19:36:22,681 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 19:51:22,894 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 20:06:23,016 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 20:21:23,110 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 20:36:03,232 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-19 20:36:23,220 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 20:37:35,550 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-19 20:51:03,400 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-19 20:51:23,332 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 21:06:23,447 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 21:21:23,545 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 21:36:03,682 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-19 21:36:23,658 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 21:50:53,770 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 22:05:53,867 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 22:06:04,061 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-19 22:20:46,031 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 22:21:04,154 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-19 22:35:46,125 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 22:40:27,459 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 22:55:27,579 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 23:05:48,109 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 23:20:48,208 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 23:35:48,300 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-19 23:50:48,466 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 00:05:48,559 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 00:20:48,666 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 00:35:48,759 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 00:50:48,852 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 01:05:48,948 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 01:20:49,052 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 01:25:45,798 - trading_bot - INFO - New message received (reply: False): 🔎⚜️Free signal in 2 hours⚜️🔎
+
+           ⚜️Follow ...
+2025-04-20 01:25:45,799 - trading_bot - INFO - Cleaned message: 🔎⚜️Free signal in 2 hours⚜️🔎
+
+           ⚜️Follow the link ⚜️
+
+  https://t.me/+1_Ypl4J_0bEyMDA0
+  https://t.me/+1_Ypl4J_0bEyMDA0
+🌿
+2025-04-20 01:25:45,799 - trading_bot - INFO - Trying to parse as profit message: 🔎⚜️Free signal in 2 hours⚜️🔎
+
+           ⚜️Follow the link ⚜️
+
+  https://t.me/+1_Ypl4J_0bEyMDA0
+  https://t.me/+1_Ypl4J_0bEyMDA0
+🌿
+2025-04-20 01:25:45,799 - trading_bot - INFO - No trading pair found in line: 🔎⚜️Free signal in 2 hours⚜️🔎
+2025-04-20 01:25:45,799 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-20 01:25:45,799 - trading_bot - INFO - Message received but not a valid signal
+2025-04-20 01:29:39,182 - telethon.client.updates - INFO - Got difference for channel 1391574614 updates
+2025-04-20 01:35:49,144 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 01:50:49,235 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 01:51:05,940 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 02:05:49,374 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 02:11:47,195 - trading_bot - INFO - New message received (reply: True): Password 🔒:- 01791...
+2025-04-20 02:11:47,195 - trading_bot - INFO - Cleaned message: Password 🔒:- 01791
+2025-04-20 02:11:47,195 - trading_bot - INFO - Trying to parse as profit message: Password 🔒:- 01791
+2025-04-20 02:11:47,195 - trading_bot - INFO - Not enough lines for profit message format
+2025-04-20 02:11:47,195 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-20 02:11:47,195 - trading_bot - INFO - Message received but not a valid signal
+2025-04-20 02:20:49,466 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 02:35:49,561 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 02:36:06,258 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 02:50:47,503 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 02:51:01,152 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 03:05:47,624 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 03:06:01,390 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 03:20:47,769 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 03:21:01,543 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 03:35:47,908 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 03:36:01,661 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 03:50:47,237 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 03:50:48,000 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 03:55:25,255 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 04:05:47,387 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 04:05:56,056 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 04:10:12,880 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 04:20:56,158 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 04:25:04,693 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 04:25:13,044 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 04:35:49,928 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 04:40:13,155 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 04:50:50,050 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 04:55:13,330 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 05:05:50,164 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 05:06:07,543 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 05:10:13,445 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 05:10:16,580 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 05:20:53,065 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 05:22:39,506 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-20 05:25:13,557 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 05:35:53,188 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 05:36:38,182 - trading_bot - INFO - New message received (reply: False): 🆘 JOIN RUSSIAN TRADERS NOW 🆘
+
+🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽
+
+https:/...
+2025-04-20 05:36:38,182 - trading_bot - INFO - Cleaned message: 🆘 JOIN RUSSIAN TRADERS NOW 🆘
+
+🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽
+
+https://t.me/+1_Ypl4J_0bEyMDA0
+
+Join Them as Fast as Possible ✅
+2025-04-20 05:36:38,182 - trading_bot - INFO - Trying to parse as profit message: 🆘 JOIN RUSSIAN TRADERS NOW 🆘
+
+🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽
+
+https://t.me/+1_Ypl4J_0bEyMDA0
+
+Join Them as Fast as Possible ✅
+2025-04-20 05:36:38,182 - trading_bot - INFO - No trading pair found in line: 🆘 JOIN RUSSIAN TRADERS NOW 🆘
+2025-04-20 05:36:38,183 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-20 05:36:38,183 - trading_bot - INFO - Message received but not a valid signal
+2025-04-20 05:37:39,650 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-20 05:44:41,416 - telethon.client.updates - INFO - Got difference for channel 1391574614 updates
+2025-04-20 05:50:53,283 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 05:55:13,756 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 06:05:53,393 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 06:06:08,026 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 06:20:53,625 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 06:25:13,968 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 06:35:53,730 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 06:36:08,251 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 06:50:53,834 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 06:51:08,455 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 06:52:40,322 - telethon.client.updates - INFO - Got difference for channel 1391574614 updates
+2025-04-20 06:52:40,323 - trading_bot - INFO - New message received (reply: False): **📈****I am giving ****🪙****0.012 btc to first ***...
+2025-04-20 06:52:40,323 - trading_bot - INFO - Cleaned message: 📈I am giving 🪙0.012 btc to first ✅ 20 members who will join my  channel. 
+🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽
+
+https://t.me/+1_Ypl4J_0bEyMDA0
+
+🟥🟥🟥🟥🟥🟥🟥🟥🟥
+2025-04-20 06:52:40,323 - trading_bot - INFO - Trying to parse as profit message: 📈I am giving 🪙0.012 btc to first ✅ 20 members who will join my  channel. 
+🔽🔽🔽🔽🔽🔽🔽🔽🔽🔽
+
+https://t.me/+1_Ypl4J_0bEyMDA0
+
+🟥🟥🟥🟥🟥🟥🟥🟥🟥
+2025-04-20 06:52:40,323 - trading_bot - INFO - No trading pair found in line: 📈I am giving 🪙0.012 btc to first ✅ 20 members who will join my  channel.
+2025-04-20 06:52:40,323 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-20 06:52:40,323 - trading_bot - INFO - Message received but not a valid signal
+2025-04-20 06:55:06,110 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 07:06:08,571 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 07:10:06,252 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 07:10:14,274 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 07:11:54,686 - trading_bot - INFO - New message received (reply: False): **Date - 2/4/2025 🔼
+
+💥 Signal Count : 15
+⚠️ Stop L...
+2025-04-20 07:11:54,687 - trading_bot - INFO - Cleaned message: Date - 2/4/2025 🔼
+
+💥 Signal Count : 15
+⚠️ Stop Loss : 01
+👑 Target Done : 15
+
+🔄 Overall Profit :- 1329.01
+
+⭐️ Bitcoin Bulls © PNL 🖥
+
+👑 -   @Grefton   ⭐️
+2025-04-20 07:11:54,687 - trading_bot - INFO - Trying to parse as profit message: Date - 2/4/2025 🔼
+
+💥 Signal Count : 15
+⚠️ Stop Loss : 01
+👑 Target Done : 15
+
+🔄 Overall Profit :- 1329.01
+
+⭐️ Bitcoin Bulls © PNL 🖥
+
+👑 -   @Grefton   ⭐️
+2025-04-20 07:11:54,687 - trading_bot - INFO - Found symbol: 2/4
+2025-04-20 07:11:54,687 - trading_bot - INFO - No position type found in: Date - 2/4/2025 🔼
+2025-04-20 07:11:54,688 - trading_bot - INFO - New format - Found symbol: 2/4
+2025-04-20 07:11:54,688 - trading_bot - INFO - Message received but not a valid signal
+2025-04-20 07:12:54,739 - trading_bot - INFO - New message received (reply: False): **Date - 2/4/2025 ****🔼****
+
+****💥**** Signal Coun...
+2025-04-20 07:12:54,739 - trading_bot - INFO - Cleaned message: Date - 2/4/2025 🔼
+
+💥 Signal Count : 15
+⚠️ Stop Loss : 01
+👑 Target Done : 15
+
+🔄 Overall Profit :- 1329.01
+
+⭐️ Bitcoin Bulls © PNL 🖥
+
+👑 -   @Grefton   ⭐️
+2025-04-20 07:12:54,739 - trading_bot - INFO - Trying to parse as profit message: Date - 2/4/2025 🔼
+
+💥 Signal Count : 15
+⚠️ Stop Loss : 01
+👑 Target Done : 15
+
+🔄 Overall Profit :- 1329.01
+
+⭐️ Bitcoin Bulls © PNL 🖥
+
+👑 -   @Grefton   ⭐️
+2025-04-20 07:12:54,739 - trading_bot - INFO - Found symbol: 2/4
+2025-04-20 07:12:54,740 - trading_bot - INFO - No position type found in: Date - 2/4/2025 🔼
+2025-04-20 07:12:54,740 - trading_bot - INFO - New format - Found symbol: 2/4
+2025-04-20 07:12:54,740 - trading_bot - INFO - Message received but not a valid signal
+2025-04-20 07:25:06,364 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 07:36:08,765 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 07:40:06,461 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 07:40:14,483 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 07:51:08,945 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 07:55:06,630 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 07:55:14,577 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 07:58:56,596 - telethon.client.updates - INFO - Got difference for channel 1391574614 updates
+2025-04-20 07:58:56,597 - trading_bot - INFO - New message received (reply: False): **+11150% (110x) without risks!
+
+Goal by the end o...
+2025-04-20 07:58:56,597 - trading_bot - INFO - Cleaned message: +11150% (110x) without risks!
+
+Goal by the end of the Day : +5000% to the deposit on futures📈📈📈📈📈📈
+
+https://t.me/+1_Ypl4J_0bEyMDA0
+https://t.me/+1_Ypl4J_0bEyMDA0
+2025-04-20 07:58:56,597 - trading_bot - INFO - Trying to parse as profit message: +11150% (110x) without risks!
+
+Goal by the end of the Day : +5000% to the deposit on futures📈📈📈📈📈📈
+
+https://t.me/+1_Ypl4J_0bEyMDA0
+https://t.me/+1_Ypl4J_0bEyMDA0
+2025-04-20 07:58:56,597 - trading_bot - INFO - No trading pair found in line: +11150% (110x) without risks!
+2025-04-20 07:58:56,598 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-20 07:58:56,598 - trading_bot - INFO - Message received but not a valid signal
+2025-04-20 08:06:09,068 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 08:10:06,733 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 08:21:09,176 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 08:25:06,838 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 08:36:09,339 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 08:36:21,511 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 08:40:14,904 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 08:40:37,614 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 08:51:09,713 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 08:51:09,808 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 08:55:15,064 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 09:06:09,874 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 09:06:10,024 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 09:10:15,253 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 09:21:10,120 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 09:36:10,065 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 09:36:10,210 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 09:51:10,333 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 09:51:23,182 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 09:58:57,516 - telethon.client.updates - INFO - Got difference for channel 1391574614 updates
+2025-04-20 09:58:57,516 - trading_bot - INFO - New message received (reply: False): 🎉 **In honor of $48,000 in BTC - I’m opening a FRE...
+2025-04-20 09:58:57,516 - trading_bot - INFO - Cleaned message: 🎉 In honor of $48,000 in BTC - I’m opening a FREE set to the 📦
+
+I will accept 30 people ‼️
+No more (seriously) 🤷‍♀️
+
+Take access 👉 https://t.me/+1_Ypl4J_0bEyMDA0
+2025-04-20 09:58:57,517 - trading_bot - INFO - Trying to parse as profit message: 🎉 In honor of $48,000 in BTC - I’m opening a FREE set to the 📦
+
+I will accept 30 people ‼️
+No more (seriously) 🤷‍♀️
+
+Take access 👉 https://t.me/+1_Ypl4J_0bEyMDA0
+2025-04-20 09:58:57,517 - trading_bot - INFO - No trading pair found in line: 🎉 In honor of $48,000 in BTC - I’m opening a FREE set to the 📦
+2025-04-20 09:58:57,517 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-20 09:58:57,517 - trading_bot - INFO - Message received but not a valid signal
+2025-04-20 10:06:03,808 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 10:06:10,341 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 10:06:23,297 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 10:21:03,900 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 10:21:23,450 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 10:22:42,326 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-20 10:22:43,470 - telethon.client.updates - INFO - Got difference for channel 1484533565 updates
+2025-04-20 10:25:21,694 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 10:35:50,876 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 10:40:21,800 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 10:50:50,980 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 10:54:36,458 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 10:55:21,912 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 11:05:51,073 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 11:06:22,284 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 11:10:22,030 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 11:10:31,424 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 11:11:36,730 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-20 11:20:48,648 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 11:21:22,387 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 11:25:04,840 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 11:26:01,201 - trading_bot - INFO - New message received (reply: False): ‼️**BOOOMM ****😀****💥
+
+****#Vip**** open for Free ...
+2025-04-20 11:26:01,201 - trading_bot - INFO - Cleaned message: ‼️BOOOMM 😀💥
+
+#Vip open for Free to everyone ! Just today 😀
+
+Click to link Register for slots ⬇️🔽⬇️🔽
+
+https://t.me/+1_Ypl4J_0bEyMDA0
+https://t.me/+1_Ypl4J_0bEyMDA0
+
+🌿
+2025-04-20 11:26:01,202 - trading_bot - INFO - Trying to parse as profit message: ‼️BOOOMM 😀💥
+
+#Vip open for Free to everyone ! Just today 😀
+
+Click to link Register for slots ⬇️🔽⬇️🔽
+
+https://t.me/+1_Ypl4J_0bEyMDA0
+https://t.me/+1_Ypl4J_0bEyMDA0
+
+🌿
+2025-04-20 11:26:01,202 - trading_bot - INFO - No trading pair found in line: ‼️BOOOMM 😀💥
+2025-04-20 11:26:01,202 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-20 11:26:01,202 - trading_bot - INFO - Message received but not a valid signal
+2025-04-20 11:28:58,123 - telethon.client.updates - INFO - Got difference for channel 1391574614 updates
+2025-04-20 11:35:48,797 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 11:36:22,487 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 11:40:04,994 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 11:50:49,012 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 11:51:22,592 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 12:05:49,157 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 12:06:22,710 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 12:20:49,330 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 12:21:13,219 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 12:35:49,438 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 12:36:13,381 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 12:36:22,951 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 12:50:49,576 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 12:51:13,489 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 13:05:49,704 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 13:06:13,589 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 13:06:23,250 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 13:20:49,825 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 13:21:13,699 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 13:35:49,946 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 13:36:13,840 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 13:47:04,466 - trading_bot - INFO - New message received (reply: False): #GRT
+
+The Graph is preparing to break out of its d...
+2025-04-20 13:47:04,467 - trading_bot - INFO - Cleaned message: #GRT
+
+The Graph is preparing to break out of its descending channel formation on the daily chart👀
+
+Price is currently approaching the descending resistance after months in downtrend🧐
+
+A breakout above it could lead to targets at $0.105, $0.145 and $0.185🚀
+2025-04-20 13:47:04,467 - trading_bot - INFO - Trying to parse as profit message: #GRT
+
+The Graph is preparing to break out of its descending channel formation on the daily chart👀
+
+Price is currently approaching the descending resistance after months in downtrend🧐
+
+A breakout above it could lead to targets at $0.105, $0.145 and $0.185🚀
+2025-04-20 13:47:04,467 - trading_bot - INFO - No trading pair found in line: #GRT
+2025-04-20 13:47:04,467 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-20 13:47:04,467 - trading_bot - INFO - Message received but not a valid signal
+2025-04-20 13:50:50,081 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 13:51:13,939 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 13:51:23,580 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 14:05:50,183 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 14:06:23,728 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 14:20:50,319 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 14:21:23,901 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 14:25:45,358 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 14:26:38,431 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-20 14:36:06,213 - telethon.client.updates - INFO - Got difference for channel 1391574614 updates
+2025-04-20 14:36:06,214 - trading_bot - INFO - New message received (reply: False): 🔎⚜️**Free signal in 2 hours****⚜️****🔎****
+
+      ...
+2025-04-20 14:36:06,214 - trading_bot - INFO - Cleaned message: 🔎⚜️Free signal in 2 hours⚜️🔎
+
+           ⚜️Follow the link ⚜️
+
+ https://t.me/+1_Ypl4J_0bEyMDA0
+ https://t.me/+1_Ypl4J_0bEyMDA0
+🌿
+2025-04-20 14:36:06,214 - trading_bot - INFO - Trying to parse as profit message: 🔎⚜️Free signal in 2 hours⚜️🔎
+
+           ⚜️Follow the link ⚜️
+
+ https://t.me/+1_Ypl4J_0bEyMDA0
+ https://t.me/+1_Ypl4J_0bEyMDA0
+🌿
+2025-04-20 14:36:06,214 - trading_bot - INFO - No trading pair found in line: 🔎⚜️Free signal in 2 hours⚜️🔎
+2025-04-20 14:36:06,214 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-20 14:36:06,214 - trading_bot - INFO - Message received but not a valid signal
+2025-04-20 14:36:14,330 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 14:36:23,995 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 14:40:45,475 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 14:51:14,440 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 14:54:56,941 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 14:55:45,592 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 15:05:58,681 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 15:06:13,864 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 15:09:57,108 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 15:20:58,848 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 15:21:13,986 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 15:24:51,995 - trading_bot - INFO - New message received (reply: True): Password 🔓:- 01799...
+2025-04-20 15:24:51,996 - trading_bot - INFO - Cleaned message: Password 🔓:- 01799
+2025-04-20 15:24:51,996 - trading_bot - INFO - Trying to parse as profit message: Password 🔓:- 01799
+2025-04-20 15:24:51,996 - trading_bot - INFO - Not enough lines for profit message format
+2025-04-20 15:24:51,996 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-20 15:24:51,996 - trading_bot - INFO - Message received but not a valid signal
+2025-04-20 15:24:57,237 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 15:35:59,009 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 15:36:14,088 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 15:39:57,441 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 15:51:14,210 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 15:55:29,191 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 15:55:40,021 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 16:00:07,631 - trading_bot - INFO - New message received (reply: False): ‼️There is one closed channel where many traders t...
+2025-04-20 16:00:07,632 - trading_bot - INFO - Cleaned message: ‼️There is one closed channel where many traders take ideas with a profitability of 400% roe! ‼️
+
+ Its owner is winner of the 2023 world trading tournament on ByBit!
+
+I dug up access for you:  
+
+✅ https://t.me/+1_Ypl4J_0bEyMDA0
+
+⚡️if the link works consider it a gift ;)
+2025-04-20 16:00:07,632 - trading_bot - INFO - Trying to parse as profit message: ‼️There is one closed channel where many traders take ideas with a profitability of 400% roe! ‼️
+
+ Its owner is winner of the 2023 world trading tournament on ByBit!
+
+I dug up access for you:  
+
+✅ https://t.me/+1_Ypl4J_0bEyMDA0
+
+⚡️if the link works consider it a gift ;)
+2025-04-20 16:00:07,632 - trading_bot - INFO - No trading pair found in line: ‼️There is one closed channel where many traders take ideas with a profitability of 400% roe! ‼️
+2025-04-20 16:00:07,632 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-20 16:00:07,632 - trading_bot - INFO - Message received but not a valid signal
+2025-04-20 16:00:26,990 - telethon.client.updates - INFO - Got difference for channel 1391574614 updates
+2025-04-20 16:00:26,991 - trading_bot - INFO - New message received (reply: False): 😱😱😱[**...few places still left for joining**](http...
+2025-04-20 16:00:26,991 - trading_bot - INFO - Cleaned message: 😱😱😱[...few places still left for joining](https://t.me/+EpWfyoeUJ5c5MjFl)...🔥🔥🔥
+2025-04-20 16:00:26,992 - trading_bot - INFO - Trying to parse as profit message: 😱😱😱[...few places still left for joining](https://t.me/+EpWfyoeUJ5c5MjFl)...🔥🔥🔥
+2025-04-20 16:00:26,992 - trading_bot - INFO - Not enough lines for profit message format
+2025-04-20 16:00:26,992 - trading_bot - INFO - Message received but not a valid signal
+2025-04-20 16:06:00,593 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 16:06:32,227 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 16:10:49,382 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 16:21:28,757 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 16:21:32,335 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 16:24:57,778 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 16:36:28,917 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 16:51:29,024 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 16:54:40,954 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 17:06:29,169 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 17:09:41,091 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 17:21:29,382 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 17:24:41,208 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 17:26:40,028 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-20 17:36:29,537 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 17:39:41,317 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 17:40:58,062 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 17:42:10,104 - trading_bot - INFO - New message received (reply: False): 😉😌😍🥰** PUMP GROUP :** [LINK 1](https://t.me/+1_Ypl...
+2025-04-20 17:42:10,104 - trading_bot - INFO - Cleaned message: 😉😌😍🥰 PUMP GROUP : [LINK 1](https://t.me/+1_Ypl4J_0bEyMDA0)
+
+⚡️⚡️⚡️⚡️ SCALPING GROUP : [LINK 2](https://t.me/+1_Ypl4J_0bEyMDA0)
+
+💎💎💎💎💎💎GEM CHANNEL 100X : [LINK 3](https://t.me/+1_Ypl4J_0bEyMDA0)
+2025-04-20 17:42:10,104 - trading_bot - INFO - Trying to parse as profit message: 😉😌😍🥰 PUMP GROUP : [LINK 1](https://t.me/+1_Ypl4J_0bEyMDA0)
+
+⚡️⚡️⚡️⚡️ SCALPING GROUP : [LINK 2](https://t.me/+1_Ypl4J_0bEyMDA0)
+
+💎💎💎💎💎💎GEM CHANNEL 100X : [LINK 3](https://t.me/+1_Ypl4J_0bEyMDA0)
+2025-04-20 17:42:10,104 - trading_bot - INFO - No trading pair found in line: 😉😌😍🥰 PUMP GROUP : [LINK 1](https://t.me/+1_Ypl4J_0bEyMDA0)
+2025-04-20 17:42:10,104 - trading_bot - INFO - Message received but not a valid signal
+2025-04-20 17:45:27,924 - telethon.client.updates - INFO - Got difference for channel 1391574614 updates
+2025-04-20 17:55:58,180 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 18:06:35,126 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 18:09:41,518 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 18:10:58,903 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 18:24:41,625 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 18:25:59,045 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 18:30:27,718 - trading_bot - INFO - New message received (reply: True): I can’t believe 👀👀👀...
+2025-04-20 18:30:27,718 - trading_bot - INFO - Cleaned message: I can’t believe 👀👀👀
+2025-04-20 18:30:27,718 - trading_bot - INFO - Trying to parse as profit message: I can’t believe 👀👀👀
+2025-04-20 18:30:27,718 - trading_bot - INFO - Not enough lines for profit message format
+2025-04-20 18:30:27,718 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-20 18:30:27,718 - trading_bot - INFO - Message received but not a valid signal
+2025-04-20 18:39:41,722 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 18:40:59,159 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 18:54:41,827 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 19:03:31,501 - telethon.client.updates - INFO - Got difference for channel 1316448339 updates
+2025-04-20 19:05:12,078 - trading_bot - INFO - New message received (reply: False): **📈****I am giving ****🪙****0.012 btc to first ***...
+2025-04-20 19:05:12,078 - trading_bot - INFO - Cleaned message: 📈I am giving 🪙0.012 btc to first ✅20 members who will join my  channel. 
+⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️
+
+https://t.me/+1_Ypl4J_0bEyMDA0
+https://t.me/+1_Ypl4J_0bEyMDA0
+
+🟩🟩🟩🟩🟩🟩🟩🟩🟩
+2025-04-20 19:05:12,078 - trading_bot - INFO - Trying to parse as profit message: 📈I am giving 🪙0.012 btc to first ✅20 members who will join my  channel. 
+⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️
+
+https://t.me/+1_Ypl4J_0bEyMDA0
+https://t.me/+1_Ypl4J_0bEyMDA0
+
+🟩🟩🟩🟩🟩🟩🟩🟩🟩
+2025-04-20 19:05:12,078 - trading_bot - INFO - No trading pair found in line: 📈I am giving 🪙0.012 btc to first ✅20 members who will join my  channel.
+2025-04-20 19:05:12,078 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-20 19:05:12,079 - trading_bot - INFO - Message received but not a valid signal
+2025-04-20 19:06:33,574 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 19:09:41,962 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 19:18:31,609 - telethon.client.updates - INFO - Got difference for channel 1316448339 updates
+2025-04-20 19:25:59,541 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 19:40:59,699 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 19:51:44,198 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 19:54:42,265 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 20:06:15,141 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 20:06:33,969 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 20:10:45,296 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 20:24:42,502 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 20:25:45,405 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 20:39:42,602 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 20:40:45,535 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 20:41:41,639 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-20 20:55:45,661 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 21:10:45,767 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 21:21:26,631 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 21:21:34,453 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 21:26:41,944 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-20 21:36:26,724 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 21:39:43,051 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 21:40:49,859 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 21:55:49,958 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 22:10:50,082 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 22:25:50,186 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 22:40:50,310 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 22:54:43,592 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-20 22:55:50,406 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 22:56:42,582 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-20 23:00:42,185 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 23:15:42,286 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 23:30:42,386 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-20 23:51:35,522 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-20 23:54:43,992 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 00:00:42,614 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 00:06:35,636 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 00:15:42,717 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 00:21:35,772 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 00:30:25,659 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 00:35:05,817 - trading_bot - ERROR - Error canceling SL after TP hit: APIError(code=-2011): Unknown order sent.
+2025-04-21 00:35:05,817 - trade_profits - INFO - ADAUSDT LONG - TAKE_PROFIT - Entry: 0.6323, Exit: 0.6390, P/L: 52.9233 USDT (26.49%)
+2025-04-21 00:35:06,023 - trade_profits - INFO - ADAUSDT LONG - TAKE PROFIT - Entry: 0.632300, Exit: 0.639000, P/L: 52.9233 USDT (26.49%)
+2025-04-21 00:35:06,023 - trading_bot - INFO - Sent profit result message for ADAUSDT
+2025-04-21 00:35:06,024 - trading_bot - INFO - Sent profit message for take_profit exit
+2025-04-21 00:35:06,622 - telethon.client.updates - INFO - Got difference for channel 2666168549 updates
+2025-04-21 00:36:35,880 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 00:37:20,875 - trading_bot - INFO - New message received (reply: True): **🔥 27% 𝐏𝐫𝐨𝐟𝐢𝐭 🍻  [ 𝐅𝐫𝐞𝐞 𝐒𝐢𝐠𝐧𝐚𝐥 ]
+
+🎯 𝐓𝐚𝐫𝐠𝐞𝐭 :- 1 🎉...
+2025-04-21 00:37:20,875 - trading_bot - INFO - Cleaned message: 🔥 27% 𝐏𝐫𝐨𝐟𝐢𝐭 🍻  [ 𝐅𝐫𝐞𝐞 𝐒𝐢𝐠𝐧𝐚𝐥 ]
+
+🎯 𝐓𝐚𝐫𝐠𝐞𝐭 :- 1 🎉 ✅
+
+⏰ 𝐓𝐢𝐦𝐞:- 1day 21hrs 53mints
+
+🌟 𝐕𝐢𝐩 :- @Grefton
+2025-04-21 00:37:20,875 - trading_bot - INFO - Trying to parse as profit message: 🔥 27% 𝐏𝐫𝐨𝐟𝐢𝐭 🍻  [ 𝐅𝐫𝐞𝐞 𝐒𝐢𝐠𝐧𝐚𝐥 ]
+
+🎯 𝐓𝐚𝐫𝐠𝐞𝐭 :- 1 🎉 ✅
+
+⏰ 𝐓𝐢𝐦𝐞:- 1day 21hrs 53mints
+
+🌟 𝐕𝐢𝐩 :- @Grefton
+2025-04-21 00:37:20,875 - trading_bot - INFO - No trading pair found in line: 🔥 27% 𝐏𝐫𝐨𝐟𝐢𝐭 🍻  [ 𝐅𝐫𝐞𝐞 𝐒𝐢𝐠𝐧𝐚𝐥 ]
+2025-04-21 00:37:20,875 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-21 00:37:20,875 - trading_bot - INFO - Message received but not a valid signal
+2025-04-21 00:37:20,876 - trading_bot - INFO - New message received (reply: True): **🔰 125$ ℙ𝕣𝕠𝕗𝕚𝕥 𝔼𝕒𝕤𝕚𝕝𝕪 𝕄𝕒𝕕𝕖⚡️💥
+
+📨 𝕍𝕚𝕡 ➡️ ****@Gref...
+2025-04-21 00:37:20,876 - trading_bot - INFO - Cleaned message: 🔰 125$ ℙ𝕣𝕠𝕗𝕚𝕥 𝔼𝕒𝕤𝕚𝕝𝕪 𝕄𝕒𝕕𝕖⚡️💥
+
+📨 𝕍𝕚𝕡 ➡️ @Grefton ⬅️ ℂ𝕠𝕟𝕥𝕒𝕔𝕥
+2025-04-21 00:37:20,876 - trading_bot - INFO - Trying to parse as profit message: 🔰 125$ ℙ𝕣𝕠𝕗𝕚𝕥 𝔼𝕒𝕤𝕚𝕝𝕪 𝕄𝕒𝕕𝕖⚡️💥
+
+📨 𝕍𝕚𝕡 ➡️ @Grefton ⬅️ ℂ𝕠𝕟𝕥𝕒𝕔𝕥
+2025-04-21 00:37:20,876 - trading_bot - INFO - Not enough lines for profit message format
+2025-04-21 00:37:20,876 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-21 00:37:20,876 - trading_bot - INFO - Message received but not a valid signal
+2025-04-21 00:45:25,773 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 00:45:50,981 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 01:00:51,119 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 01:15:51,241 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 01:30:51,345 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 01:36:36,289 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 01:39:44,736 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 01:45:51,444 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 01:50:58,258 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 02:00:34,151 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 02:05:58,347 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 02:11:43,961 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-21 02:15:34,268 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 02:20:58,540 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 02:30:34,359 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 02:35:58,706 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 02:39:45,199 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 02:40:10,409 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 02:45:34,452 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 02:48:34,697 - telethon.client.updates - INFO - Got difference for channel 1316448339 updates
+2025-04-21 02:54:45,482 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 02:55:10,510 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 03:00:34,545 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 03:09:45,579 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 03:10:10,647 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 03:10:21,559 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 03:15:26,257 - trading_bot - INFO - New message received (reply: False): **🟩****PAID GROUP IS NOW FREE FOR NEXT 3 MINUTES.*...
+2025-04-21 03:15:26,258 - trading_bot - INFO - Cleaned message: 🟩PAID GROUP IS NOW FREE FOR NEXT 3 MINUTES.✈️✈️✈️
+
+⚡️HURRY UP JOIN FASTLY⭐⭐
+  CLICK HERE FAST...✅✅
+
+https://t.me/+Dg1N7DgZsHA3ZGE1
+https://t.me/+Dg1N7DgZsHA3ZGE1
+2025-04-21 03:15:26,258 - trading_bot - INFO - Trying to parse as profit message: 🟩PAID GROUP IS NOW FREE FOR NEXT 3 MINUTES.✈️✈️✈️
+
+⚡️HURRY UP JOIN FASTLY⭐⭐
+  CLICK HERE FAST...✅✅
+
+https://t.me/+Dg1N7DgZsHA3ZGE1
+https://t.me/+Dg1N7DgZsHA3ZGE1
+2025-04-21 03:15:26,258 - trading_bot - INFO - No trading pair found in line: 🟩PAID GROUP IS NOW FREE FOR NEXT 3 MINUTES.✈️✈️✈️
+2025-04-21 03:15:26,258 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-21 03:15:26,258 - trading_bot - INFO - Message received but not a valid signal
+2025-04-21 03:15:31,240 - telethon.client.updates - INFO - Got difference for channel 1391574614 updates
+2025-04-21 03:24:45,700 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 03:30:34,747 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 03:39:45,806 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 03:40:21,902 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 03:45:34,846 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 03:51:12,470 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 03:54:45,917 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 03:56:44,903 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-21 04:00:34,940 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 04:06:12,603 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 04:15:35,061 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 04:21:12,713 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 04:30:35,153 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 04:37:28,814 - trading_bot - INFO - New message received (reply: True): VIP Password 🔐:- 01791...
+2025-04-21 04:37:28,815 - trading_bot - INFO - Cleaned message: VIP Password 🔐:- 01791
+2025-04-21 04:37:28,815 - trading_bot - INFO - Trying to parse as profit message: VIP Password 🔐:- 01791
+2025-04-21 04:37:28,815 - trading_bot - INFO - Not enough lines for profit message format
+2025-04-21 04:37:28,815 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-21 04:37:28,815 - trading_bot - INFO - Message received but not a valid signal
+2025-04-21 04:39:46,376 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 04:45:35,248 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 04:54:46,483 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 05:00:35,481 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 05:06:13,128 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 05:06:32,315 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 05:15:35,644 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 05:18:30,031 - trading_bot - INFO - New message received (reply: True): **🔥 96% 𝐏𝐫𝐨𝐟𝐢𝐭 🍻  [ 𝐅𝐫𝐞𝐞 𝐒𝐢𝐠𝐧𝐚𝐥 ]
+
+🎯 𝐓𝐚𝐫𝐠𝐞𝐭 :- 1, ...
+2025-04-21 05:18:30,032 - trading_bot - INFO - Cleaned message: 🔥 96% 𝐏𝐫𝐨𝐟𝐢𝐭 🍻  [ 𝐅𝐫𝐞𝐞 𝐒𝐢𝐠𝐧𝐚𝐥 ]
+
+🎯 𝐓𝐚𝐫𝐠𝐞𝐭 :- 1, 2, 3, 4 🎉 ✅
+
+⏰ 𝐓𝐢𝐦𝐞:- 5days 2hrs 13mints
+
+🌟 𝐕𝐢𝐩 :- @Grefton
+2025-04-21 05:18:30,032 - trading_bot - INFO - Trying to parse as profit message: 🔥 96% 𝐏𝐫𝐨𝐟𝐢𝐭 🍻  [ 𝐅𝐫𝐞𝐞 𝐒𝐢𝐠𝐧𝐚𝐥 ]
+
+🎯 𝐓𝐚𝐫𝐠𝐞𝐭 :- 1, 2, 3, 4 🎉 ✅
+
+⏰ 𝐓𝐢𝐦𝐞:- 5days 2hrs 13mints
+
+🌟 𝐕𝐢𝐩 :- @Grefton
+2025-04-21 05:18:30,032 - trading_bot - INFO - No trading pair found in line: 🔥 96% 𝐏𝐫𝐨𝐟𝐢𝐭 🍻  [ 𝐅𝐫𝐞𝐞 𝐒𝐢𝐠𝐧𝐚𝐥 ]
+2025-04-21 05:18:30,032 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-21 05:18:30,032 - trading_bot - INFO - Message received but not a valid signal
+2025-04-21 05:18:35,742 - trading_bot - INFO - New message received (reply: True): **🔰 475$ ℙ𝕣𝕠𝕗𝕚𝕥 𝔼𝕒𝕤𝕚𝕝𝕪 𝕄𝕒𝕕𝕖⚡️💥
+
+📨 𝕍𝕚𝕡 ➡️ ****@Gref...
+2025-04-21 05:18:35,742 - trading_bot - INFO - Cleaned message: 🔰 475$ ℙ𝕣𝕠𝕗𝕚𝕥 𝔼𝕒𝕤𝕚𝕝𝕪 𝕄𝕒𝕕𝕖⚡️💥
+
+📨 𝕍𝕚𝕡 ➡️ @Grefton ⬅️ ℂ𝕠𝕟𝕥𝕒𝕔𝕥
+2025-04-21 05:18:35,742 - trading_bot - INFO - Trying to parse as profit message: 🔰 475$ ℙ𝕣𝕠𝕗𝕚𝕥 𝔼𝕒𝕤𝕚𝕝𝕪 𝕄𝕒𝕕𝕖⚡️💥
+
+📨 𝕍𝕚𝕡 ➡️ @Grefton ⬅️ ℂ𝕠𝕟𝕥𝕒𝕔𝕥
+2025-04-21 05:18:35,742 - trading_bot - INFO - Not enough lines for profit message format
+2025-04-21 05:18:35,742 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-21 05:18:35,742 - trading_bot - INFO - Message received but not a valid signal
+2025-04-21 05:21:13,238 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 05:21:32,415 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 05:30:35,738 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 05:36:05,461 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 05:36:32,517 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 05:40:36,299 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 05:45:35,846 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 05:51:09,851 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 05:51:17,648 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 05:52:10,076 - trading_bot - INFO - New message received (reply: True): **🔥 47% 𝐏𝐫𝐨𝐟𝐢𝐭 🍻  [ 𝐅𝐫𝐞𝐞 𝐒𝐢𝐠𝐧𝐚𝐥 ]
+
+🎯 𝐓𝐚𝐫𝐠𝐞𝐭 :- 1, ...
+2025-04-21 05:52:10,076 - trading_bot - INFO - Cleaned message: 🔥 47% 𝐏𝐫𝐨𝐟𝐢𝐭 🍻  [ 𝐅𝐫𝐞𝐞 𝐒𝐢𝐠𝐧𝐚𝐥 ]
+
+🎯 𝐓𝐚𝐫𝐠𝐞𝐭 :- 1, 2 🎉 ✅
+
+⏰ 𝐓𝐢𝐦𝐞:- 2days 3hrs 10mints
+
+🌟 𝐕𝐢𝐩 :- @Grefton
+2025-04-21 05:52:10,077 - trading_bot - INFO - Trying to parse as profit message: 🔥 47% 𝐏𝐫𝐨𝐟𝐢𝐭 🍻  [ 𝐅𝐫𝐞𝐞 𝐒𝐢𝐠𝐧𝐚𝐥 ]
+
+🎯 𝐓𝐚𝐫𝐠𝐞𝐭 :- 1, 2 🎉 ✅
+
+⏰ 𝐓𝐢𝐦𝐞:- 2days 3hrs 10mints
+
+🌟 𝐕𝐢𝐩 :- @Grefton
+2025-04-21 05:52:10,077 - trading_bot - INFO - No trading pair found in line: 🔥 47% 𝐏𝐫𝐨𝐟𝐢𝐭 🍻  [ 𝐅𝐫𝐞𝐞 𝐒𝐢𝐠𝐧𝐚𝐥 ]
+2025-04-21 05:52:10,077 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-21 05:52:10,077 - trading_bot - INFO - Message received but not a valid signal
+2025-04-21 05:52:10,077 - trading_bot - INFO - New message received (reply: True): **🔰 220$ ℙ𝕣𝕠𝕗𝕚𝕥 𝔼𝕒𝕤𝕚𝕝𝕪 𝕄𝕒𝕕𝕖⚡️💥
+
+📨 𝕍𝕚𝕡 ➡️ ****@Gref...
+2025-04-21 05:52:10,078 - trading_bot - INFO - Cleaned message: 🔰 220$ ℙ𝕣𝕠𝕗𝕚𝕥 𝔼𝕒𝕤𝕚𝕝𝕪 𝕄𝕒𝕕𝕖⚡️💥
+
+📨 𝕍𝕚𝕡 ➡️ @Grefton ⬅️ ℂ𝕠𝕟𝕥𝕒𝕔𝕥
+2025-04-21 05:52:10,078 - trading_bot - INFO - Trying to parse as profit message: 🔰 220$ ℙ𝕣𝕠𝕗𝕚𝕥 𝔼𝕒𝕤𝕚𝕝𝕪 𝕄𝕒𝕕𝕖⚡️💥
+
+📨 𝕍𝕚𝕡 ➡️ @Grefton ⬅️ ℂ𝕠𝕟𝕥𝕒𝕔𝕥
+2025-04-21 05:52:10,078 - trading_bot - INFO - Not enough lines for profit message format
+2025-04-21 05:52:10,078 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-21 05:52:10,078 - trading_bot - INFO - Message received but not a valid signal
+2025-04-21 06:00:41,558 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 06:04:31,455 - trading_bot - INFO - New message received (reply: False): ✅ FREE SIGNAL
+
+✅ Futures and Spot signals 
+
+https:...
+2025-04-21 06:04:31,455 - trading_bot - INFO - Cleaned message: ✅ FREE SIGNAL
+
+✅ Futures and Spot signals 
+
+https://t.me/+flkbFssRzZ01MjA1
+
+💥NEXT SIGNAL 👆🏻
+
+BEST CHANNEL ON TELEGRAM  ❤️‍🔥
+2025-04-21 06:04:31,455 - trading_bot - INFO - Trying to parse as profit message: ✅ FREE SIGNAL
+
+✅ Futures and Spot signals 
+
+https://t.me/+flkbFssRzZ01MjA1
+
+💥NEXT SIGNAL 👆🏻
+
+BEST CHANNEL ON TELEGRAM  ❤️‍🔥
+2025-04-21 06:04:31,455 - trading_bot - INFO - No trading pair found in line: ✅ FREE SIGNAL
+2025-04-21 06:04:31,456 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-21 06:04:31,456 - trading_bot - INFO - Message received but not a valid signal
+2025-04-21 06:06:10,018 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 06:06:32,808 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 06:15:32,479 - telethon.client.updates - INFO - Got difference for channel 1391574614 updates
+2025-04-21 06:15:41,678 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 06:21:10,113 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 06:21:30,766 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 06:21:32,909 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 06:30:20,501 - telethon.client.updates - INFO - Got difference for channel 2552442439 updates
+2025-04-21 06:36:01,661 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 06:36:30,871 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 06:36:33,022 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 06:51:01,861 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 06:51:30,967 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 06:51:33,121 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 07:00:20,728 - trading_bot - INFO - New message received (reply: False): **Convert ****💰****10$ into 100$ ****🪙****
+       ...
+2025-04-21 07:00:20,729 - trading_bot - INFO - Cleaned message: Convert 💰10$ into 100$ 🪙
+                💰100$ into 1k$ 🪙
+                💰1k$ into 10k$ 🪙
+‼️10x Your Funds 🔥
+
+✔️ https://t.me/+flkbFssRzZ01MjA1
+2025-04-21 07:00:20,729 - trading_bot - INFO - Trying to parse as profit message: Convert 💰10$ into 100$ 🪙
+                💰100$ into 1k$ 🪙
+                💰1k$ into 10k$ 🪙
+‼️10x Your Funds 🔥
+
+✔️ https://t.me/+flkbFssRzZ01MjA1
+2025-04-21 07:00:20,730 - trading_bot - INFO - No trading pair found in line: Convert 💰10$ into 100$ 🪙
+2025-04-21 07:00:20,730 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-21 07:00:20,730 - trading_bot - INFO - Message received but not a valid signal
+2025-04-21 07:06:31,122 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 07:06:33,237 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 07:07:33,219 - trading_bot - INFO - New message received (reply: False): **Date - 3/4/2025 ****🔼****
+
+****💥**** Signal Coun...
+2025-04-21 07:07:33,220 - trading_bot - INFO - Cleaned message: Date - 3/4/2025 🔼
+
+💥 Signal Count : 15
+⚠️ Stop Loss : 01
+👑 Target Done : 15
+
+🔄 Overall Profit :- 1577.42
+
+⭐️ Bitcoin Bulls © PNL 🖥
+
+👑 -   @Grefton   ⭐️
+2025-04-21 07:07:33,220 - trading_bot - INFO - Trying to parse as profit message: Date - 3/4/2025 🔼
+
+💥 Signal Count : 15
+⚠️ Stop Loss : 01
+👑 Target Done : 15
+
+🔄 Overall Profit :- 1577.42
+
+⭐️ Bitcoin Bulls © PNL 🖥
+
+👑 -   @Grefton   ⭐️
+2025-04-21 07:07:33,220 - trading_bot - INFO - Found symbol: 3/4
+2025-04-21 07:07:33,220 - trading_bot - INFO - No position type found in: Date - 3/4/2025 🔼
+2025-04-21 07:07:33,220 - trading_bot - INFO - New format - Found symbol: 3/4
+2025-04-21 07:07:33,220 - trading_bot - INFO - Message received but not a valid signal
+2025-04-21 07:21:15,506 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 07:21:33,352 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 07:36:02,294 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 07:36:15,603 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 07:36:33,482 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 07:45:00,842 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-21 07:51:02,471 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 07:51:15,769 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 07:51:33,589 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 07:55:01,684 - telethon.client.updates - INFO - Got difference for channel 1391574614 updates
+2025-04-21 07:55:01,686 - trading_bot - INFO - New message received (reply: False): **‼️****Private channel leaked.......
+
+Free - Only...
+2025-04-21 07:55:01,686 - trading_bot - INFO - Cleaned message: ‼️Private channel leaked.......
+
+Free - Only For First 30 Members ‼️
+ 
+https://t.me/+flkbFssRzZ01MjA1
+
+Join Fast 🔼🔼
+2025-04-21 07:55:01,686 - trading_bot - INFO - Trying to parse as profit message: ‼️Private channel leaked.......
+
+Free - Only For First 30 Members ‼️
+ 
+https://t.me/+flkbFssRzZ01MjA1
+
+Join Fast 🔼🔼
+2025-04-21 07:55:01,686 - trading_bot - INFO - No trading pair found in line: ‼️Private channel leaked.......
+2025-04-21 07:55:01,686 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-21 07:55:01,686 - trading_bot - INFO - Message received but not a valid signal
+2025-04-21 07:55:33,134 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 08:00:00,976 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-21 08:00:51,746 - telethon.client.updates - INFO - Got difference for channel 1888479457 updates
+2025-04-21 08:01:08,507 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 08:06:26,723 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 08:10:33,267 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 08:15:51,875 - telethon.client.updates - INFO - Got difference for channel 1888479457 updates
+2025-04-21 08:21:02,727 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 08:21:26,823 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 08:22:53,244 - telethon.client.updates - INFO - Got difference for channel 1484533565 updates
+2025-04-21 08:25:33,368 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 08:30:01,212 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-21 08:30:51,987 - telethon.client.updates - INFO - Got difference for channel 1888479457 updates
+2025-04-21 08:31:16,386 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 08:36:02,863 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 08:45:52,088 - telethon.client.updates - INFO - Got difference for channel 1888479457 updates
+2025-04-21 08:46:16,509 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 08:55:33,582 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 09:00:52,205 - telethon.client.updates - INFO - Got difference for channel 1888479457 updates
+2025-04-21 09:01:16,605 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 09:06:03,209 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 09:07:03,725 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 09:15:52,323 - telethon.client.updates - INFO - Got difference for channel 1888479457 updates
+2025-04-21 09:16:16,701 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 09:17:37,150 - telethon.client.updates - INFO - Got difference for channel 1484533565 updates
+2025-04-21 09:21:03,310 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 09:30:52,418 - telethon.client.updates - INFO - Got difference for channel 1888479457 updates
+2025-04-21 09:31:16,798 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 09:32:47,175 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-21 09:34:21,670 - trading_bot - INFO - New message received (reply: True): VIP PASSWORD 🔑:- 01781...
+2025-04-21 09:34:21,671 - trading_bot - INFO - Cleaned message: VIP PASSWORD 🔑:- 01781
+2025-04-21 09:34:21,672 - trading_bot - INFO - Trying to parse as profit message: VIP PASSWORD 🔑:- 01781
+2025-04-21 09:34:21,672 - trading_bot - INFO - Not enough lines for profit message format
+2025-04-21 09:34:21,672 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-21 09:34:21,672 - trading_bot - INFO - Message received but not a valid signal
+2025-04-21 09:36:48,019 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 09:46:16,891 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 09:51:48,110 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 10:01:17,209 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 10:13:21,018 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-21 10:15:48,434 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 10:21:48,312 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 10:30:48,536 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 10:36:03,974 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 10:43:21,265 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-21 10:51:04,230 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 10:51:48,510 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 11:00:48,720 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 11:00:52,995 - telethon.client.updates - INFO - Got difference for channel 1888479457 updates
+2025-04-21 11:06:04,353 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 11:06:33,460 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 11:06:37,811 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 11:10:39,090 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 11:14:39,361 - trading_bot - INFO - New message received (reply: False): 🆘**Soon TRON (TRX) will be rigidly pumped to  ****...
+2025-04-21 11:14:39,361 - trading_bot - INFO - Cleaned message: 🆘Soon TRON (TRX) will be rigidly pumped to  💵1️⃣
+Insider information.
+The link is deleted after 4️⃣0️⃣ minutes
+⬇️🔽🔽🔽🔽⬇️
+
+https://t.me/+flkbFssRzZ01MjA1
+https://t.me/+flkbFssRzZ01MjA1
+
+Join this 👆👆👆
+2025-04-21 11:14:39,361 - trading_bot - INFO - Trying to parse as profit message: 🆘Soon TRON (TRX) will be rigidly pumped to  💵1️⃣
+Insider information.
+The link is deleted after 4️⃣0️⃣ minutes
+⬇️🔽🔽🔽🔽⬇️
+
+https://t.me/+flkbFssRzZ01MjA1
+https://t.me/+flkbFssRzZ01MjA1
+
+Join this 👆👆👆
+2025-04-21 11:14:39,361 - trading_bot - INFO - No trading pair found in line: 🆘Soon TRON (TRX) will be rigidly pumped to  💵1️⃣
+2025-04-21 11:14:39,361 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-21 11:14:39,362 - trading_bot - INFO - Message received but not a valid signal
+2025-04-21 11:21:33,587 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 11:21:37,919 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 11:25:39,203 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 11:36:33,709 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 11:51:33,942 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 12:06:34,457 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 12:06:38,220 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 12:15:38,646 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 12:20:40,857 - trading_bot - INFO - New message received (reply: False): ⌛#ARK/USDT  ( LONG )
+
+🍁 Leverage 👉 20X to 25X
+
+⛩️ ...
+2025-04-21 12:20:40,858 - trading_bot - INFO - Cleaned message: ⌛#ARK/USDT  ( LONG )
+
+🍁 Leverage 👉 20X to 25X
+
+⛩️ Entry ➡️ 0.4796 - 0.4808
+
+💠 Targets :- 0.4847  0.4897  0.4945  0.4997  0.5045  0.5115
+
+🔕 Stoploss = 0.4540
+2025-04-21 12:20:40,858 - trading_bot - INFO - Trying to parse as profit message: ⌛#ARK/USDT  ( LONG )
+
+🍁 Leverage 👉 20X to 25X
+
+⛩️ Entry ➡️ 0.4796 - 0.4808
+
+💠 Targets :- 0.4847  0.4897  0.4945  0.4997  0.5045  0.5115
+
+🔕 Stoploss = 0.4540
+2025-04-21 12:20:40,858 - trading_bot - INFO - Found symbol: ARK/USDT
+2025-04-21 12:20:40,858 - trading_bot - INFO - Found position type: LONG
+2025-04-21 12:20:40,859 - trading_bot - INFO - No leverage match in: ⌛#ARK/USDT  ( LONG )
+2025-04-21 12:20:40,859 - trading_bot - INFO - New format - Found symbol: ARK/USDT
+2025-04-21 12:20:40,859 - trading_bot - INFO - New format - Found position type: LONG
+2025-04-21 12:20:40,859 - trading_bot - INFO - New format - Found leverage: 20
+2025-04-21 12:20:40,860 - trading_bot - INFO - New format - Found entry price range: 0.4796 - 0.4808
+2025-04-21 12:20:40,860 - trading_bot - INFO - New format - Found 6 targets
+2025-04-21 12:20:40,860 - trading_bot - INFO - New format - Found stop loss: 0.454
+2025-04-21 12:20:40,860 - trading_bot - INFO - Successfully parsed as new signal format
+2025-04-21 12:20:40,860 - trading_bot - INFO - Processing trade signal for ARKUSDT
+2025-04-21 12:20:40,888 - trading_bot - INFO - Set leverage for ARKUSDT to 10x
+2025-04-21 12:20:40,888 - trading_bot - INFO - Using fixed amount mode: 200.0 USDT
+2025-04-21 12:20:40,927 - trading_bot - INFO - Amount to buy: 4159.0 × 10 × 0.4804
+2025-04-21 12:20:40,934 - trading_bot - INFO - Created market entry order for ARKUSDT, BUY at 0.4805: 2742538060
+2025-04-21 12:20:40,934 - trading_bot - INFO - Using stop loss from signal: 0.454
+2025-04-21 12:20:40,969 - trading_bot - INFO - Created stop loss order for ARKUSDT at 0.454: 2742538118
+2025-04-21 12:20:41,002 - trading_bot - INFO - Created take profit order for ARKUSDT at 0.5045 (using config %): 2742538125
+2025-04-21 12:20:41,127 - trading_bot - INFO - Sent entry message for ARKUSDT
+2025-04-21 12:20:41,127 - trading_bot - INFO - Set up order execution monitor for ARKUSDT in background task
+2025-04-21 12:20:41,127 - trading_bot - INFO - Trade execution result: {'original_symbol': 'ARKUSDT', 'position': 'LONG', 'entry_order': {'orderId': 2742538060, 'symbol': 'ARKUSDT', 'status': 'NEW', 'clientOrderId': 'x-Cb7ytekJ7674d672027a725570b317', 'price': '0.0000000', 'avgPrice': '0.00', 'origQty': '4159', 'executedQty': '0', 'cumQty': '0', 'cumQuote': '0.0000000', 'timeInForce': 'GTC', 'type': 'MARKET', 'reduceOnly': False, 'closePosition': False, 'side': 'BUY', 'positionSide': 'BOTH', 'stopPrice': '0.0000000', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1745238040937}, 'stop_loss_order': {'orderId': 2742538118, 'symbol': 'ARKUSDT', 'status': 'NEW', 'clientOrderId': 'x-Cb7ytekJf444337a7eb426669a9522', 'price': '0.0000000', 'avgPrice': '0.00', 'origQty': '0', 'executedQty': '0', 'cumQty': '0', 'cumQuote': '0.0000000', 'timeInForce': 'GTC', 'type': 'STOP_MARKET', 'reduceOnly': True, 'closePosition': True, 'side': 'SELL', 'positionSide': 'BOTH', 'stopPrice': '0.4540000', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'STOP_MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1745238040972}, 'take_profit_orders': [{'orderId': 2742538125, 'symbol': 'ARKUSDT', 'status': 'NEW', 'clientOrderId': 'x-Cb7ytekJff59127bf459f315483d13', 'price': '0.0000000', 'avgPrice': '0.00', 'origQty': '0', 'executedQty': '0', 'cumQty': '0', 'cumQuote': '0.0000000', 'timeInForce': 'GTC', 'type': 'TAKE_PROFIT_MARKET', 'reduceOnly': True, 'closePosition': True, 'side': 'SELL', 'positionSide': 'BOTH', 'stopPrice': '0.5045000', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'TAKE_PROFIT_MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1745238041005}], 'errors': [], 'warnings': [], 'entry_price': 0.4805, 'current_price': 0.4805, 'use_limit_order': False, 'symbol': 'ARKUSDT', 'stop_loss': 0.454, 'take_profit_levels': [{'price': 0.4847, 'percentage': 16.666666666666668}, {'price': 0.4897, 'percentage': 16.666666666666668}, {'price': 0.4945, 'percentage': 16.666666666666668}, {'price': 0.4997, 'percentage': 16.666666666666668}, {'price': 0.5045, 'percentage': 16.666666666666668}, {'price': 0.5115, 'percentage': 16.666666666666668}], 'position_size': 4159.0, 'order_monitoring': True}
+2025-04-21 12:20:41,138 - trading_bot - INFO - Entry order 2742538060 filled at 0.480529
+2025-04-21 12:21:13,841 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 12:21:38,317 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 12:27:41,544 - telethon.client.updates - INFO - Got difference for channel 1742512586 updates
+2025-04-21 12:28:05,940 - trading_bot - INFO - New message received (reply: False): #SWCH
+
+Don't miss out on $SWCH after 250 % last we...
+2025-04-21 12:28:05,941 - trading_bot - INFO - Cleaned message: #SWCH
+
+Don't miss out on $SWCH after 250 % last week, good time to invest now - since there is a correction😉
+
+SwissChease is preparing to breakout of the broadening wedge on the daily timeframe👨‍💻
+
+Looking for a leg upwards if resistance is broken with targets at $1.00, $1.50 and $2.00🎯
+2025-04-21 12:28:05,941 - trading_bot - INFO - Trying to parse as profit message: #SWCH
+
+Don't miss out on $SWCH after 250 % last week, good time to invest now - since there is a correction😉
+
+SwissChease is preparing to breakout of the broadening wedge on the daily timeframe👨‍💻
+
+Looking for a leg upwards if resistance is broken with targets at $1.00, $1.50 and $2.00🎯
+2025-04-21 12:28:05,941 - trading_bot - INFO - No trading pair found in line: #SWCH
+2025-04-21 12:28:05,942 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-21 12:28:05,942 - trading_bot - INFO - Message received but not a valid signal
+2025-04-21 12:29:41,573 - telethon.client.updates - INFO - Got difference for channel 1742512586 updates
+2025-04-21 12:30:38,814 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 12:36:13,977 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 12:45:38,918 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 12:51:14,183 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 12:51:38,533 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 12:58:22,410 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-21 13:00:39,087 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 13:06:14,296 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 13:06:31,255 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 13:06:38,645 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 13:15:18,555 - telethon.client.updates - INFO - Got difference for channel 1391574614 updates
+2025-04-21 13:15:18,556 - trading_bot - INFO - New message received (reply: False): **Binance Futures Signals****👇****
+
+**https://t.me...
+2025-04-21 13:15:18,557 - trading_bot - INFO - Cleaned message: Binance Futures Signals👇
+
+https://t.me/+flkbFssRzZ01MjA1
+
+Don't miss 🔥🔥
+2025-04-21 13:15:18,557 - trading_bot - INFO - Trying to parse as profit message: Binance Futures Signals👇
+
+https://t.me/+flkbFssRzZ01MjA1
+
+Don't miss 🔥🔥
+2025-04-21 13:15:18,557 - trading_bot - INFO - No trading pair found in line: Binance Futures Signals👇
+2025-04-21 13:15:18,557 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-21 13:15:18,558 - trading_bot - INFO - Message received but not a valid signal
+2025-04-21 13:21:31,364 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 13:21:38,759 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 13:30:54,230 - telethon.client.updates - INFO - Got difference for channel 1888479457 updates
+2025-04-21 13:36:14,624 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 13:36:31,509 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 13:36:38,866 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 13:51:31,711 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 13:58:22,918 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-21 14:00:41,594 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 14:06:15,027 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 14:06:16,076 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 14:21:16,179 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 14:28:23,157 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-21 14:30:54,671 - telethon.client.updates - INFO - Got difference for channel 1888479457 updates
+2025-04-21 14:31:06,371 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 14:36:15,234 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 14:45:54,794 - telethon.client.updates - INFO - Got difference for channel 1888479457 updates
+2025-04-21 14:46:06,487 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 14:58:23,518 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-21 15:01:06,602 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 15:02:40,090 - telethon.client.updates - INFO - Got difference for channel 1484533565 updates
+2025-04-21 15:06:15,542 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 15:13:23,612 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-21 15:16:06,703 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 15:21:15,682 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 15:21:39,625 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 15:30:55,264 - telethon.client.updates - INFO - Got difference for channel 1888479457 updates
+2025-04-21 15:31:03,508 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 15:46:03,607 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 15:51:16,033 - telethon.client.updates - INFO - Got difference for channel 2056235438 updates
+2025-04-21 15:51:39,862 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates
+2025-04-21 16:01:03,709 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 16:07:56,752 - trading_bot - INFO - New message received (reply: True): 👆...
+2025-04-21 16:07:56,752 - trading_bot - INFO - Cleaned message: 👆
+2025-04-21 16:07:56,753 - trading_bot - INFO - Trying to parse as profit message: 👆
+2025-04-21 16:07:56,753 - trading_bot - INFO - Not enough lines for profit message format
+2025-04-21 16:07:56,753 - trading_bot - ERROR - Error parsing standard message: expected string or bytes-like object
+2025-04-21 16:07:56,753 - trading_bot - INFO - Message received but not a valid signal
+2025-04-21 16:13:24,063 - telethon.client.updates - INFO - Got difference for account updates
+2025-04-21 16:16:03,815 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 16:30:45,243 - telethon.client.updates - INFO - Got difference for channel 1973256957 updates
+2025-04-21 16:36:40,189 - telethon.client.updates - INFO - Got difference for channel 1594190598 updates

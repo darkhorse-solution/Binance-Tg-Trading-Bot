@@ -360,7 +360,7 @@ class BinanceTrader:
             if trading_mode == "fixed":
                 # Fixed amount mode
                 CONSTANT_AMOUNT = Config.CONSTANT_AMOUNT
-                amount_to_trade_in_quote = CONSTANT_AMOUNT * leverage - 2
+                amount_to_trade_in_quote = CONSTANT_AMOUNT - 10
                 logger.info(f"Using fixed amount mode: {CONSTANT_AMOUNT} {QUOTE_ASSET}")
             else:
                 # Wallet ratio mode (default)
