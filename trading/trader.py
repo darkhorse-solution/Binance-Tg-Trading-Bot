@@ -1210,7 +1210,29 @@ class BinanceTrader:
         else:
             # No range provided, just use the single entry price from signal
             entry_price = signal.get('entry_price', current_price)
-            use_limit_order = False
+            
+            # Check if we should use limit order (explicitly set in signal or comparison logic)
+            use_limit_order = signal.get('use_limit_order', False)
+            
+            # For Russian signals with explicit entry price and limit order flag
+            if use_limit_order and position_type == 'SHORT':
+                # For SHORT, we want to sell at higher price
+                if current_price < entry_price:
+                    use_limit_order = True
+                    logger.info(f"SHORT - Current: {current_price}, Entry: {entry_price} - Using limit order")
+                else:
+                    # Could use market if price is already at or above entry
+                    # But for Russian signals we stick with limit orders as specified
+                    logger.info(f"SHORT - Current: {current_price}, Entry: {entry_price} - Using limit order per signal instruction")
+            elif use_limit_order and position_type == 'LONG':
+                # For LONG, we want to buy at lower price
+                if current_price > entry_price:
+                    use_limit_order = True
+                    logger.info(f"LONG - Current: {current_price}, Entry: {entry_price} - Using limit order")
+                else:
+                    # Could use market if price is already at or below entry
+                    # But for Russian signals we stick with limit orders as specified
+                    logger.info(f"LONG - Current: {current_price}, Entry: {entry_price} - Using limit order per signal instruction")
         
         original_stop_loss = signal.get('stop_loss')
         original_take_profit_levels = signal['take_profit_levels']
@@ -1321,19 +1343,27 @@ class BinanceTrader:
             # Step 4: Create the main entry order
             side = "BUY" if position_type == 'LONG' else "SELL"
             try:
+                # Check if we should use a limit order
                 if use_limit_order:
-                    # Create a limit order at the designated price
+                    # Get price precision for the symbol
+                    price_precision = self.get_price_precision(symbol)
+                    # Round entry price to proper precision
+                    formatted_price = round(entry_price, price_precision) if price_precision else entry_price
+                    
+                    # Use LIMIT order at the exact entry price specified in the signal
+                    logger.info(f"Creating LIMIT {side} order for {symbol} at price {formatted_price}")
                     entry_order = self.client.futures_create_order(
                         symbol=symbol,
                         side=side,
                         type="LIMIT",
                         quantity=position_size,
-                        price=entry_price,
+                        price=formatted_price,
                         timeInForce="GTC"  # Good Till Cancelled
                     )
-                    logger.info(f"Created limit entry order for {symbol}, {side} at {entry_price}: {entry_order['orderId']}")
+                    logger.info(f"Created limit entry order for {symbol}, {side} at {formatted_price}: {entry_order['orderId']}")
                 else:
                     # Use market order
+                    logger.info(f"Creating MARKET {side} order for {symbol}")
                     entry_order = self.client.futures_create_order(
                         symbol=symbol,
                         side=side,
@@ -1405,32 +1435,42 @@ class BinanceTrader:
                 results['warnings'].append(f"Failed to create stop loss order: {str(e)}")
                 # We can continue with just the entry order, but it's risky
             
-            # Step 6: Create take profit order using the config settings instead of signal levels
+            # Step 6: Create take profit orders
             try:
-                # Calculate take profit using configured percentage
-                default_tp_percent = float(Config.DEFAULT_TP_PERCENT)
-                price_precision = self.get_price_precision(symbol)
+                tp_orders = []
+                # Use the TP levels directly from the signal
+                for tp_level in take_profit_levels:
+                    # Get the TP price from the level
+                    tp_price = tp_level.get('price')
+                    
+                    if not tp_price or tp_price <= 0:
+                        logger.warning(f"Invalid TP price: {tp_price}. Skipping this TP level.")
+                        continue
+                        
+                    # Get price precision for the symbol
+                    price_precision = self.get_price_precision(symbol)
+                    # Round TP price to proper precision
+                    formatted_tp_price = round(tp_price, price_precision) if price_precision else tp_price
+                    
+                    logger.info(f"Creating TP order for {symbol} at price {formatted_tp_price}")
+                    
+                    # Create take profit order
+                    tp_result = self.client.futures_create_order(
+                        symbol=symbol,
+                        side='SELL' if side == 'BUY' else 'BUY',  # Opposite of entry side
+                        type="TAKE_PROFIT_MARKET",
+                        stopPrice=formatted_tp_price,
+                        closePosition=True  # Close the entire position
+                    )
+                    logger.info(f"Created take profit order for {symbol} at {formatted_tp_price}: {tp_result['orderId']}")
+                    tp_orders.append(tp_result)
                 
-                if position_type == 'LONG':
-                    tp_price = entry_price * (1 + (default_tp_percent / (100 * max_leverage)))
-                else:  # SHORT
-                    tp_price = entry_price * (1 - (default_tp_percent / (100 * max_leverage)))
+                # Store all TP orders in results
+                results['take_profit_orders'] = tp_orders
                 
-                tp_price = round(tp_price, price_precision) if price_precision else tp_price
-                
-                # Create take profit order
-                tp_result = self.client.futures_create_order(
-                    symbol=symbol,
-                    side='SELL' if side == 'BUY' else 'BUY',
-                    type="TAKE_PROFIT_MARKET",
-                    stopPrice=tp_price,
-                    closePosition=True  # Close the entire position
-                )
-                logger.info(f"Created take profit order for {symbol} at {tp_price} (using config %): {tp_result['orderId']}")
-                results['take_profit_orders'].append(tp_result)
             except Exception as e:
-                logger.error(f"Error creating take profit order: {e}")
-                results['warnings'].append(f"Failed to create take profit order: {str(e)}")
+                logger.error(f"Error creating take profit orders: {e}")
+                results['warnings'].append(f"Failed to create take profit orders: {str(e)}")
                 # We can continue with just entry and stop loss
                 
             # Get SL and TP prices for notification

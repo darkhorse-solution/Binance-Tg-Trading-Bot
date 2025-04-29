@@ -4,7 +4,8 @@ import asyncio
 from telethon import TelegramClient, events
 from telethon.sessions import StringSession
 
-from trading.signal import SignalParser, SignalFormatter
+from trading.signal_parser import SignalParser
+from trading.signal import SignalFormatter
 from trading.trader import BinanceTrader
 from trading.symbol_mapper import SymbolMapper
 from utils.logger import logger
@@ -125,9 +126,15 @@ class TradingBot:
                     logger.info(f"Processing profit message (reply: {is_reply}) for {signal.get('binance_symbol', 'unknown')}")
                     await self._handle_profit_message(signal, formatted_message)
                 elif not is_reply:  # Only process new trade signals if they're not replies
-                    # For trading signals, execute trades
-                    logger.info(f"Processing trade signal for {signal.get('binance_symbol', 'unknown')}")
-                    await self._execute_trades(signal)
+                    # Process Russian format signals if enabled
+                    if signal.get('is_russian_format', False) and Config.ENABLE_RUSSIAN_SIGNALS:
+                        logger.info(f"Processing Russian format signal for {signal.get('binance_symbol', 'unknown')}")
+                        # Process Russian signal differently if configured
+                        await self._process_russian_signal(signal)
+                    else:
+                        # For standard trading signals, execute trades
+                        logger.info(f"Processing trade signal for {signal.get('binance_symbol', 'unknown')}")
+                        await self._execute_trades(signal)
 
                     # Send formatted message to target channel if not empty and entry notifications are disabled
                     # This prevents duplicate messages when entry notifications are enabled
@@ -141,6 +148,77 @@ class TradingBot:
                     logger.info(f"Skipping trade execution for reply message: {message.text[:50]}...")
             else:
                 logger.info("Message received but not a valid signal")
+    
+    async def _process_russian_signal(self, signal):
+        """
+        Process Russian format signals with special handling for take profits.
+        
+        Args:
+            signal (dict): The parsed Russian format signal
+        """
+        # Get TP levels from the signal
+        tp_levels = signal.get('take_profit_levels', [])
+        
+        # If we have at least 2 TP levels, take the average of the first two
+        if len(tp_levels) >= 2:
+            # Calculate average of first two TP prices - ENSURE PRECISION
+            first_tp = float(tp_levels[0]['price'])
+            second_tp = float(tp_levels[1]['price'])
+            avg_price = (first_tp + second_tp) / 2
+            
+            # Log the exact calculation for transparency
+            logger.info(f"Calculating average TP: ({first_tp} + {second_tp}) / 2 = {avg_price}")
+            
+            signal['take_profit_levels'] = [{
+                'price': avg_price,
+                'percentage': 100
+            }]
+            logger.info(f"Using average of first two TP levels: {avg_price}")
+        elif len(tp_levels) == 1:
+            # If only one TP level, use it with 100% weight
+            signal['take_profit_levels'][0]['percentage'] = 100
+            logger.info(f"Using single TP level: {signal['take_profit_levels'][0]['price']}")
+        
+        # Get current price for comparison with entry price
+        try:
+            current_price = self.trader.get_last_price(signal['binance_symbol'])
+            if current_price and 'entry_price' in signal and signal['entry_price'] > 0:
+                signal['current_price'] = current_price
+                position_type = signal.get('position_type', '')
+                entry_price = signal['entry_price']
+                
+                # Determine if we should use limit order based on position type and price comparison
+                use_limit = False
+                
+                # For SHORT positions: We want to sell at a higher price, so wait if current price is lower
+                if position_type == 'SHORT':
+                    if current_price < entry_price:
+                        use_limit = True
+                        logger.info(f"SHORT position - Current price ({current_price}) is LOWER than entry price ({entry_price}). Using LIMIT order to wait for better entry.")
+                    else:
+                        logger.info(f"SHORT position - Current price ({current_price}) is HIGHER than entry price ({entry_price}). Could use MARKET order.")
+                
+                # For LONG positions: We want to buy at a lower price, so wait if current price is higher
+                elif position_type == 'LONG':
+                    if current_price > entry_price:
+                        use_limit = True
+                        logger.info(f"LONG position - Current price ({current_price}) is HIGHER than entry price ({entry_price}). Using LIMIT order to wait for better entry.")
+                    else:
+                        logger.info(f"LONG position - Current price ({current_price}) is LOWER than entry price ({entry_price}). Could use MARKET order.")
+                
+                # Set limit order flag - ALWAYS use limit order for Russian signals with entry price
+                signal['use_limit_order'] = True
+                logger.info(f"Using limit order for {signal['binance_symbol']} at price {entry_price}")
+                
+        except Exception as e:
+            logger.error(f"Error getting current price: {e}")
+            # Default to using limit order if we can't determine price
+            if 'entry_price' in signal and signal['entry_price'] > 0:
+                signal['use_limit_order'] = True
+                logger.info(f"Using limit order for {signal['binance_symbol']} at price {signal['entry_price']} (default without price check)")
+        
+        # Execute the trade
+        await self._execute_trades(signal)
 
     async def _handle_profit_message(self, signal, formatted_message):
         """

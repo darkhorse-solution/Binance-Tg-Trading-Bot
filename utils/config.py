@@ -56,6 +56,10 @@ class Config:
     WALLET_RATIO = float(os.getenv("WALLET_RATIO", "10"))
     CONSTANT_AMOUNT = float(os.getenv("CONSTANT_AMOUNT", "100.0"))
     QUOTE_ASSET = os.getenv("QUOTE_ASSET", "USDT")
+    
+    # NEW: Russian signal settings
+    ENABLE_RUSSIAN_SIGNALS = os.getenv("ENABLE_RUSSIAN_SIGNALS", "true").lower() == "true"
+    RUSSIAN_TP_MODE = os.getenv("RUSSIAN_TP_MODE", "average")  # "all", "first", "average"
 
     @classmethod
     def validate(cls) -> Dict[str, str]:
@@ -100,6 +104,10 @@ class Config:
         # Validate constant amount if in fixed mode
         if cls.TRADING_MODE.lower() == "fixed" and cls.CONSTANT_AMOUNT <= 0:
             errors["CONSTANT_AMOUNT"] = "Constant amount must be greater than 0"
+            
+        # Validate Russian TP mode
+        if cls.RUSSIAN_TP_MODE.lower() not in ["all", "first", "average"]:
+            errors["RUSSIAN_TP_MODE"] = "Russian TP mode must be 'all', 'first', or 'average'"
 
         return errors
 
