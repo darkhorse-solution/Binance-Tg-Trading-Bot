@@ -696,54 +696,120 @@ class BinanceTrader:
         # Use original symbol for display if provided, otherwise use actual symbol
         display_symbol = original_symbol if original_symbol else symbol
         
+        # Track important state
+        start_time = time.time()
+        position_ever_existed = False
+        entry_order_filled = False
+        
+        # Check if this is tracking an existing position (using timestamp as entry_order_id)
+        is_existing_position = entry_order_id >= 1000000000000  # Timestamp-based dummy ID
+        
+        # For existing positions, don't try to check the entry order
+        use_limit_order = False
+        if not is_existing_position:
+            # Try to determine if this is a limit order, but don't error if order info isn't available
+            try:
+                order_info = self.client.futures_get_order(symbol=symbol, orderId=entry_order_id)
+                use_limit_order = order_info.get('type', '') == 'LIMIT'
+                order_status = order_info.get('status', '')
+                logger.info(f"Order {entry_order_id} identified as {order_info.get('type', 'UNKNOWN')} order with status {order_status}")
+                
+                # If order is already filled, mark it as such
+                if order_status == 'FILLED':
+                    entry_order_filled = True
+                    logger.info(f"Order {entry_order_id} is already filled")
+                    
+                # If order is already canceled or expired, stop monitoring
+                elif order_status in ['CANCELED', 'REJECTED', 'EXPIRED']:
+                    logger.warning(f"Order {entry_order_id} is already {order_status}, stopping monitoring")
+                    return
+            except Exception as e:
+                # Don't treat this as a critical error, just log and continue
+                logger.info(f"Could not retrieve order {entry_order_id} info: {e}")
+                # Assume it's a market order if we can't determine (safer default)
+                use_limit_order = False
+        else:
+            # For existing positions, mark as filled
+            entry_order_filled = True
+            position_ever_existed = True
+            logger.info(f"Monitoring existing position for {symbol} at {entry_price}")
+        
         try:
-            # For positions that already exist, we don't need to check entry order
-            check_entry = entry_order_id < 1000000000000  # If it's a real order ID, not our dummy timestamp
-            
-            if check_entry:
-                # Wait for entry order to be filled
+            # Step 1: Wait for entry order to be filled if it's a new order and not already filled
+            if not is_existing_position and not entry_order_filled:
                 entry_filled = False
                 check_attempts = 0
                 
-                while not entry_filled and check_attempts < 6:  # Check for 3 minutes max
+                # Quick check loop for entry order fill (3 minutes max)
+                while not entry_filled and check_attempts < 6:
                     try:
-                        order_status = self.client.futures_get_order(symbol=symbol, orderId=entry_order_id)
-                        if order_status['status'] == 'FILLED':
-                            entry_filled = True
+                        # Check if order exists and its status
+                        try:
+                            order_status = self.client.futures_get_order(symbol=symbol, orderId=entry_order_id)
                             
-                            # Get actual filled price and quantity
-                            try:
-                                actual_entry_price = float(order_status['avgPrice'])
-                                if actual_entry_price > 0:
-                                    entry_price = actual_entry_price
-                            except (KeyError, ValueError):
-                                pass
+                            if order_status['status'] == 'FILLED':
+                                entry_filled = True
+                                entry_order_filled = True
                                 
-                            try:
-                                actual_position_size = float(order_status['executedQty'])
-                                if actual_position_size > 0:
-                                    position_size = actual_position_size
-                            except (KeyError, ValueError):
-                                pass
+                                # Get actual filled price and quantity
+                                try:
+                                    actual_entry_price = float(order_status['avgPrice'])
+                                    if actual_entry_price > 0:
+                                        entry_price = actual_entry_price
+                                except (KeyError, ValueError):
+                                    pass
+                                    
+                                try:
+                                    actual_position_size = float(order_status['executedQty'])
+                                    if actual_position_size > 0:
+                                        position_size = actual_position_size
+                                except (KeyError, ValueError):
+                                    pass
+                                    
+                                logger.info(f"Entry order {entry_order_id} filled at {entry_price}")
+                            elif order_status['status'] in ['CANCELED', 'REJECTED', 'EXPIRED']:
+                                logger.warning(f"Entry order {entry_order_id} {order_status['status']} - stopping monitor")
+                                return  # Exit the function if entry is cancelled
+                            else:
+                                # Order exists but is not filled yet
+                                logger.info(f"Order {entry_order_id} status: {order_status['status']}, waiting...")
+                                await asyncio.sleep(30)
+                                check_attempts += 1
+                        except Exception as e:
+                            if "Order does not exist" in str(e):
+                                # Order doesn't exist - either it was never created or already filled
+                                # Check if we have a position to determine if it was filled
+                                position_info = self.client.futures_position_information(symbol=symbol)
+                                position = next((p for p in position_info if p['symbol'] == symbol 
+                                            and float(p['positionAmt']) != 0), None)
                                 
-                            logger.info(f"Entry order {entry_order_id} filled at {entry_price}")
-                        else:
-                            await asyncio.sleep(30)
-                            check_attempts += 1
+                                if position:
+                                    # Position exists, so order must have been filled
+                                    entry_filled = True
+                                    entry_order_filled = True
+                                    position_ever_existed = True
+                                    logger.info(f"Order {entry_order_id} not found, but position exists. Assuming filled.")
+                                else:
+                                    # No position, order probably never created or was cancelled
+                                    logger.warning(f"Order {entry_order_id} not found and no position exists. Stopping monitor.")
+                                    return
+                            else:
+                                # Some other error checking the order
+                                logger.error(f"Error checking entry order: {e}")
+                                await asyncio.sleep(30)
+                                check_attempts += 1
                     except Exception as e:
                         logger.error(f"Error checking entry order: {e}")
                         await asyncio.sleep(30)
                         check_attempts += 1
                 
                 if not entry_filled:
-                    logger.warning(f"Entry order {entry_order_id} not filled after timeout")
-                    # Continue monitoring anyway, in case it gets filled later
-            else:
-                # For existing positions, consider entry already filled
-                entry_filled = True
-                logger.info(f"Monitoring existing position for {symbol} at {entry_price}")
-                    
-            # Monitor the position until it's closed
+                    if use_limit_order:
+                        logger.info(f"Limit entry order {entry_order_id} not filled after initial check period. Continuing to monitor.")
+                    else:
+                        logger.warning(f"Market entry order {entry_order_id} not filled after timeout. This is unusual.")
+            
+            # Step 2: Monitor the position until it's closed
             position_closed = False
             exit_price = 0
             exit_type = "unknown"
@@ -758,12 +824,47 @@ class BinanceTrader:
                 sleep_time = min(base_sleep_time + (check_count // 5) * 10, 120)
                 check_count += 1
                 
+                # For limit orders that haven't filled yet, check status
+                if use_limit_order and not entry_order_filled:
+                    # Periodically check entry order status for limit orders
+                    if check_count % 3 == 0:  # Check every 3 iterations
+                        try:
+                            try:
+                                order_status = self.client.futures_get_order(symbol=symbol, orderId=entry_order_id)
+                                if order_status['status'] == 'FILLED':
+                                    logger.info(f"Limit entry order {entry_order_id} now filled at {order_status['avgPrice']}")
+                                    entry_order_filled = True
+                                    entry_price = float(order_status['avgPrice']) if 'avgPrice' in order_status else entry_price
+                                elif order_status['status'] in ['CANCELED', 'REJECTED', 'EXPIRED']:
+                                    logger.warning(f"Entry order {entry_order_id} is now {order_status['status']}")
+                                    return  # Exit the function if entry is cancelled
+                            except Exception as e:
+                                if "Order does not exist" in str(e):
+                                    # Check if position exists to determine if order was filled
+                                    position_info = self.client.futures_position_information(symbol=symbol)
+                                    position = next((p for p in position_info if p['symbol'] == symbol 
+                                                and float(p['positionAmt']) != 0), None)
+                                    
+                                    if position:
+                                        # Position exists, so order must have been filled
+                                        entry_order_filled = True
+                                        position_ever_existed = True
+                                        logger.info(f"Order {entry_order_id} not found, but position exists. Assuming filled.")
+                                    else:
+                                        # No position and no order - stop monitoring
+                                        logger.warning(f"Limit order {entry_order_id} not found and no position exists. Stopping monitor.")
+                                        return
+                                else:
+                                    logger.error(f"Error checking limit order status: {e}")
+                        except Exception as e:
+                            logger.error(f"Error checking limit order status: {e}")
+                
                 try:
                     # Check if SL order was filled (only if we have a valid SL order ID)
-                    if sl_order_id > 0:
+                    if sl_order_id > 0 and (entry_order_filled or is_existing_position) and not exit_processed:
                         try:
                             sl_status = self.client.futures_get_order(symbol=symbol, orderId=sl_order_id)
-                            if sl_status['status'] == 'FILLED' and not exit_processed:
+                            if sl_status['status'] == 'FILLED':
                                 position_closed = True
                                 exit_type = "stop_loss"
                                 exit_processed = True
@@ -782,7 +883,34 @@ class BinanceTrader:
                                         logger.error(f"Error canceling TP after SL hit: {e}")
                         except Exception as e:
                             # If we can't check SL, it might be gone/filled
-                            logger.warning(f"Could not check SL order {sl_order_id}: {e}")
+                            if "Order does not exist" in str(e):
+                                # Check if position was closed (could be from SL)
+                                position_info = self.client.futures_position_information(symbol=symbol)
+                                position = next((p for p in position_info if p['symbol'] == symbol 
+                                            and float(p['positionAmt']) != 0), None)
+                                
+                                if not position and position_ever_existed:
+                                    # Position is gone and SL order is gone - assume SL hit
+                                    position_closed = True
+                                    exit_type = "stop_loss"
+                                    exit_processed = True
+                                    
+                                    # Use current price as exit price estimate
+                                    try:
+                                        exit_price = self.get_last_price(symbol)
+                                    except:
+                                        exit_price = entry_price  # Fallback to entry price
+                                    
+                                    logger.info(f"SL order not found and position closed. Assuming SL hit at around {exit_price}")
+                                    
+                                    # Cancel TP order if it exists
+                                    if tp_order_id > 0:
+                                        try:
+                                            self.client.futures_cancel_order(symbol=symbol, orderId=tp_order_id)
+                                        except:
+                                            pass
+                            else:
+                                logger.warning(f"Could not check SL order {sl_order_id}: {e}")
                     
                     if position_closed:
                         break
@@ -791,10 +919,10 @@ class BinanceTrader:
                     await asyncio.sleep(1)
                     
                     # Check if TP order was filled (only if we have a valid TP order ID)
-                    if tp_order_id > 0:
+                    if tp_order_id > 0 and (entry_order_filled or is_existing_position) and not exit_processed:
                         try:
                             tp_status = self.client.futures_get_order(symbol=symbol, orderId=tp_order_id)
-                            if tp_status['status'] == 'FILLED' and not exit_processed:
+                            if tp_status['status'] == 'FILLED':
                                 position_closed = True
                                 exit_type = "take_profit"
                                 exit_processed = True
@@ -813,20 +941,55 @@ class BinanceTrader:
                                         logger.error(f"Error canceling SL after TP hit: {e}")
                         except Exception as e:
                             # If we can't check TP, it might be gone/filled
-                            logger.warning(f"Could not check TP order {tp_order_id}: {e}")
+                            if "Order does not exist" in str(e):
+                                # Check if position was closed (could be from TP)
+                                position_info = self.client.futures_position_information(symbol=symbol)
+                                position = next((p for p in position_info if p['symbol'] == symbol 
+                                            and float(p['positionAmt']) != 0), None)
+                                
+                                if not position and position_ever_existed:
+                                    # Position is gone and TP order is gone - assume TP hit
+                                    position_closed = True
+                                    exit_type = "take_profit"
+                                    exit_processed = True
+                                    
+                                    # Use current price as exit price estimate
+                                    try:
+                                        exit_price = self.get_last_price(symbol)
+                                    except:
+                                        exit_price = entry_price  # Fallback to entry price
+                                    
+                                    logger.info(f"TP order not found and position closed. Assuming TP hit at around {exit_price}")
+                                    
+                                    # Cancel SL order if it exists
+                                    if sl_order_id > 0:
+                                        try:
+                                            self.client.futures_cancel_order(symbol=symbol, orderId=sl_order_id)
+                                        except:
+                                            pass
+                            else:
+                                logger.warning(f"Could not check TP order {tp_order_id}: {e}")
                     
                     if position_closed:
                         break
                     
                     # Less frequent position check (once every 3 iterations)
                     if check_count % 3 == 0:
-                        # Check if position still exists
+                        # Check if position exists
                         try:
                             position_info = self.client.futures_position_information(symbol=symbol)
                             position = next((p for p in position_info if p['symbol'] == symbol 
                                             and float(p['positionAmt']) != 0), None)
                             
-                            if not position and not exit_processed:
+                            # If position exists, mark that we had a position
+                            if position:
+                                position_ever_existed = True
+                                
+                            # Only consider position closed if:
+                            # 1. We previously had a position (position_ever_existed)
+                            # 2. Position no longer exists (not position)
+                            # 3. We haven't processed an exit yet (not exit_processed)
+                            if position_ever_existed and not position and not exit_processed:
                                 position_closed = True
                                 exit_type = "manual_or_liquidation"
                                 exit_processed = True
@@ -837,7 +1000,9 @@ class BinanceTrader:
                                 except:
                                     exit_price = entry_price  # Fallback to entry price
                                 
+                                # Cancel remaining orders
                                 await self.cancel_all_open_orders(symbol)
+                                
                         except Exception as e:
                             logger.error(f"Error checking position: {e}")
                     
@@ -848,53 +1013,61 @@ class BinanceTrader:
                     logger.error(f"Error in monitoring loop: {e}")
                     await asyncio.sleep(60)  # Sleep longer on error
             
-            # Position is now closed, calculate and report profit
-            if position_closed and exit_price > 0 and exit_processed:
-                try:
-                    # Calculate profit
-                    profit_data = await self.calculate_profit(
-                        symbol=symbol,
-                        entry_price=entry_price,
-                        exit_price=exit_price,
-                        position_size=position_size,
-                        position_type=position_type,
-                        leverage=leverage
-                    )
-                    
-                    profit_data['exit_type'] = exit_type
-                    
-                    # For display, convert prices back to original if needed
-                    if rate_multiplier != 1.0 and rate_multiplier > 0:
-                        display_entry_price = entry_price / rate_multiplier
-                        display_exit_price = exit_price / rate_multiplier
+            # Step 3: Process trade results if a position actually existed
+            if position_ever_existed and exit_processed:
+                # Position existed and was closed, calculate and report profit
+                if exit_price > 0:
+                    try:
+                        # Calculate profit
+                        profit_data = await self.calculate_profit(
+                            symbol=symbol,
+                            entry_price=entry_price,
+                            exit_price=exit_price,
+                            position_size=position_size,
+                            position_type=position_type,
+                            leverage=leverage
+                        )
                         
-                        # Update display prices but keep actual profit calculation
-                        profit_data['display_symbol'] = display_symbol
-                        profit_data['display_entry_price'] = display_entry_price
-                        profit_data['display_exit_price'] = display_exit_price
-                    else:
-                        profit_data['display_symbol'] = display_symbol
-                        profit_data['display_entry_price'] = entry_price
-                        profit_data['display_exit_price'] = exit_price
-                    
-                    # Log profit details
-                    profit_message = (
-                        f"{display_symbol} {position_type} - {exit_type.upper()} - " +
-                        f"Entry: {profit_data['display_entry_price']:.4f}, Exit: {profit_data['display_exit_price']:.4f}, " +
-                        f"P/L: {profit_data['absolute_profit']:.4f} USDT ({profit_data['leveraged_percentage']:.2f}%)"
-                    )
-                    profit_logger.info(profit_message)
-                    
-                    # Always send profit message for any exit type
-                    await self.send_profit_message(profit_data)
-                    logger.info(f"Sent profit message for {exit_type} exit")
-                    
-                except Exception as e:
-                    logger.error(f"Error processing profit result: {e}")
-                    
+                        profit_data['exit_type'] = exit_type
+                        
+                        # For display, convert prices back to original if needed
+                        if rate_multiplier != 1.0 and rate_multiplier > 0:
+                            display_entry_price = entry_price / rate_multiplier
+                            display_exit_price = exit_price / rate_multiplier
+                            
+                            # Update display prices but keep actual profit calculation
+                            profit_data['display_symbol'] = display_symbol
+                            profit_data['display_entry_price'] = display_entry_price
+                            profit_data['display_exit_price'] = display_exit_price
+                        else:
+                            profit_data['display_symbol'] = display_symbol
+                            profit_data['display_entry_price'] = entry_price
+                            profit_data['display_exit_price'] = exit_price
+                        
+                        # Log profit details
+                        profit_message = (
+                            f"{display_symbol} {position_type} - {exit_type.upper()} - " +
+                            f"Entry: {profit_data['display_entry_price']:.4f}, Exit: {profit_data['display_exit_price']:.4f}, " +
+                            f"P/L: {profit_data['absolute_profit']:.4f} USDT ({profit_data['leveraged_percentage']:.2f}%)"
+                        )
+                        profit_logger.info(profit_message)
+                        
+                        # Always send profit message for any exit type
+                        await self.send_profit_message(profit_data)
+                        logger.info(f"Sent profit message for {exit_type} exit")
+                        
+                    except Exception as e:
+                        logger.error(f"Error processing profit result: {e}")
+            elif not entry_order_filled and not is_existing_position:
+                # Entry order never filled
+                logger.info(f"Order monitoring for {symbol} stopped without a position being opened")
+                
             # Final cleanup
             try:
-                await self.cancel_all_open_orders(symbol)
+                # Cancel any remaining orders
+                cancel_result = await self.cancel_all_open_orders(symbol)
+                if cancel_result.get('canceled_orders'):
+                    logger.info(f"Canceled {len(cancel_result['canceled_orders'])} orders for {symbol}")
             except Exception as e:
                 logger.error(f"Error in final order cleanup: {e}")
                 
