@@ -84,13 +84,21 @@ class SignalParser:
         """
         Try to parse Russian format signals:
         
-        Example:
+        Example 1:
         🪙 МОНЕТА: #ADA/USDT  
         📉📈ПОКУПКА: SHORT
         ПЛЕЧО: 20х
         · Вход: 0.686$
         · Фиксируем прибыль на: 0.6774$, 0.6688$, 0.6517$ 
         · Стоп: 0.734$
+        
+        Example 2:
+        🪙МОНЕТА: #LINK/USDT  
+        📉📈ПОКУПКА: SHORT LIMIT ORDER! 
+         ПЛЕЧО: 18х
+        · Вход: 14.57$
+        · Фиксируем прибыль на: 14.161$ 
+        · Стоп: 15.703$
         
         Args:
             message (str): The message text to parse
@@ -113,6 +121,7 @@ class SignalParser:
         entry_price = None
         stop_loss = None
         take_profit_levels = []
+        is_limit_order = False
         
         # Extract trading pair (look for # followed by pair)
         for line in lines:
@@ -127,6 +136,11 @@ class SignalParser:
         # Extract position type (SHORT or LONG)
         for line in lines:
             if 'ПОКУПКА' in line or 'КУПИТЬ' in line:
+                # Check for LIMIT ORDER special case
+                if 'LIMIT ORDER' in line.upper():
+                    is_limit_order = True
+                    logger.info(f"Detected LIMIT ORDER in signal")
+                    
                 if 'SHORT' in line or 'ШОРТ' in line:
                     position_type = 'SHORT'
                 elif 'LONG' in line or 'ЛОНГ' in line:
@@ -168,20 +182,41 @@ class SignalParser:
         
         # Extract take profit levels
         for line in lines:
-            if 'прибыль' in line:
+            if 'прибыль' in line or 'Фиксируем' in line:
                 # Find all numbers in the line
                 profits = re.findall(r'(\d+\.?\d*)\$?', line)
                 if profits:
-                    # Assign percentages evenly between take profits
-                    tp_count = len(profits)
-                    percentage_per_tp = 100 / tp_count if tp_count > 0 else 100
+                    # Clean up profits list - make sure they're valid numbers
+                    cleaned_profits = []
+                    for p in profits:
+                        try:
+                            cleaned_profits.append(float(p))
+                        except:
+                            pass
                     
-                    for price in profits:
-                        take_profit_levels.append({
-                            'price': float(price),
-                            'percentage': percentage_per_tp
-                        })
-                break
+                    if cleaned_profits:
+                        profits = cleaned_profits
+                        
+                        # Special handling for LIMIT ORDER signals - use only 0.5% of TP
+                        if is_limit_order:
+                            # For limit order signals, use only the first take profit
+                            # and allocate 0.5% of position to it
+                            take_profit_levels.append({
+                                'price': float(profits[0]),
+                                'percentage': 0.5  # 0.5% as requested
+                            })
+                            logger.info(f"LIMIT ORDER signal: Using TP at {profits[0]} with 0.5% allocation")
+                        else:
+                            # For normal signals, assign percentages evenly between take profits
+                            tp_count = len(profits)
+                            percentage_per_tp = 100 / tp_count if tp_count > 0 else 100
+                            
+                            for price in profits:
+                                take_profit_levels.append({
+                                    'price': float(price),
+                                    'percentage': percentage_per_tp
+                                })
+                    break
         
         # Convert symbol format from X/Y to XY for Binance
         binance_symbol = symbol.replace('/', '')
@@ -200,7 +235,8 @@ class SignalParser:
             'original_message': message,
             'is_profit_message': False,
             'is_russian_format': True,
-            'use_limit_order': True  # Russian signals with specific entry price always use limit orders
+            'use_limit_order': True if is_limit_order else True,  # Always use limit order for Russian signals
+            'is_limit_order_signal': is_limit_order  # Flag specifically for limit order signals
         }
     
     def _try_parse_profit_message(self, message: str) -> Optional[Dict[str, Any]]:

@@ -104,12 +104,22 @@ class SignalFormatter:
         position_emoji = "🟢" if signal['position_type'] == "LONG" else "🔴"
         position_display = f"{position_emoji} {signal['position_type']}"
         
+        # Check if this is a "LIMIT ORDER" signal
+        is_limit_order_signal = signal.get('is_limit_order_signal', False)
+        
         # Calculate total profit percentage
         total_profit_percentage = sum(tp['percentage'] for tp in signal['take_profit_levels'])
         
         # Format according to TP mode
         tp_mode = Config.RUSSIAN_TP_MODE.lower()
-        if tp_mode == "average" and len(signal['take_profit_levels']) > 0:
+        if is_limit_order_signal:
+            # For limit order signals, highlight the special allocation
+            if len(signal['take_profit_levels']) > 0:
+                tp_price = signal['take_profit_levels'][0]['price']
+                tp_description = f"Take Profit Target: {tp_price:.6f} (with 0.5% allocation)\n"
+            else:
+                tp_description = "No specific take profit target\n"
+        elif tp_mode == "average" and len(signal['take_profit_levels']) > 0:
             # For average mode, calculate the average TP price
             avg_tp_price = sum(tp['price'] for tp in signal['take_profit_levels']) / len(signal['take_profit_levels'])
             tp_description = f"Take Profit (Average): {avg_tp_price:.6f}\n"
@@ -131,8 +141,10 @@ class SignalFormatter:
             f"Entry Price: {signal['entry_price']:.6f}\n"
         )
         
-        # Add order type information
-        if signal.get('use_limit_order', False):
+        # Add special indicator for limit order signals
+        if is_limit_order_signal:
+            formatted_message += f"Order Type: LIMIT ORDER ⚠️\n"
+        elif signal.get('use_limit_order', False):
             formatted_message += f"Order Type: LIMIT\n"
         
         # Add stop loss if available
@@ -142,10 +154,16 @@ class SignalFormatter:
         # Add take profit information
         formatted_message += f"\n{tp_description}"
         
+        # For limit order signals, add special note
+        if is_limit_order_signal:
+            formatted_message += f"NOTE: This is a LIMIT ORDER signal with 0.5% position allocation\n"
+        
         # Add total profit potential
         formatted_message += f"Total Profit: {total_profit_percentage:.1f}%\n"
         
         # Add hashtags
         formatted_message += f"\n#Binance #{signal['binance_symbol']} #RussianSignal"
+        if is_limit_order_signal:
+            formatted_message += " #LimitOrder"
         
         return formatted_message
